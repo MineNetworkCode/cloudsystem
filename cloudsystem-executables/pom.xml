@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>systems.beemo</groupId>
+        <artifactId>cloudsystem</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>cloudsystem-executables</artifactId>
+    <packaging>pom</packaging>
+
+    <name>cloudsystem-executables</name>
+
+    <properties>
+        <jar.plugin.version>3.2.0</jar.plugin.version>
+        <assembly.plugin.version>3.3.0</assembly.plugin.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>systems.beemo</groupId>
+            <artifactId>cloudsystem-library</artifactId>
+            <version>${revision}</version>
+        </dependency>
+    </dependencies>
+
+    <modules>
+        <module>cloudsystem-master</module>
+        <module>cloudsystem-worker</module>
+    </modules>
+</project>
