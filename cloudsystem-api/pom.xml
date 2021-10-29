@@ -20,9 +20,16 @@
     <name>cloudsystem-api</name>
 
     <properties>
-        <shade.plugin.version>3.2.4</shade.plugin.version>
+        <shade.plugin.version>3.3.0-SNAPSHOT</shade.plugin.version>
         <jvm.target.version>1.8</jvm.target.version>
     </properties>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven-snapshots</id>
+            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
 
     <dependencies>
         <dependency>
