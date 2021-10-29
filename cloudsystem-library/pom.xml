@@ -20,7 +20,8 @@
         <netty.version>4.1.69.Final</netty.version>
         <kodein.version>7.9.0</kodein.version>
         <activation.version>1.1.1</activation.version>
-        <jline.version>2.14.6</jline.version>
+        <logback.version>1.2.6</logback.version>
+        <bouncycastle.version>1.69</bouncycastle.version>
 
         <junit.version>5.8.1</junit.version>
     </properties>
@@ -56,9 +57,15 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>jline</groupId>
-            <artifactId>jline</artifactId>
-            <version>${jline.version}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>${bouncycastle.version}</version>
             <scope>compile</scope>
         </dependency>
 
