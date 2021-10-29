@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 
 class ThreadPool {
 
-    val threadPool: ExecutorService = Executors.newFixedThreadPool(15) {
+    val internalPool: ExecutorService = Executors.newFixedThreadPool(15) {
         val thread = Executors.defaultThreadFactory().newThread(it)
         thread.isDaemon = true
         thread.name = "cloudsystem-${thread.id}"
@@ -14,12 +14,12 @@ class ThreadPool {
     }
 
     fun shutdownPool() {
-        threadPool.shutdown()
+        internalPool.shutdown()
 
         try {
-            if (!threadPool.awaitTermination(1000, TimeUnit.MILLISECONDS)) threadPool.shutdownNow()
+            if (!internalPool.awaitTermination(1000, TimeUnit.MILLISECONDS)) internalPool.shutdownNow()
         } catch (e: InterruptedException) {
-            threadPool.shutdownNow()
+            internalPool.shutdownNow()
         }
     }
 }
