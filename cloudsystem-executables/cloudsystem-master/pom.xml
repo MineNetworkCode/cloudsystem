@@ -16,7 +16,7 @@
     <name>cloudsystem-master</name>
 
     <properties>
-        <project.main.class>mainClass</project.main.class>
+        <project.main.class>systems.beemo.cloudsystem.master.bootstrap.MasterBootstrapKt</project.main.class>
     </properties>
 
     <dependencies>
