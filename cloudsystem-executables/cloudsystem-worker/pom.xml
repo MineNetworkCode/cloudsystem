@@ -16,7 +16,7 @@
     <name>cloudsystem-worker</name>
 
     <properties>
-        <project.main.class>mainClass</project.main.class>
+        <project.main.class>systems.beemo.cloudsystem.worker.bootstrap.WorkerBootstrapKt</project.main.class>
     </properties>
 
     <dependencies>
