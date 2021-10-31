@@ -29,6 +29,8 @@ class CloudSystemMaster {
 
     fun shutdownGracefully() {
         this.shutdownThreads()
+
+        logger.info("Thank you for your trust in us. See ya next time!")
     }
 
     private fun prepareDI() {
