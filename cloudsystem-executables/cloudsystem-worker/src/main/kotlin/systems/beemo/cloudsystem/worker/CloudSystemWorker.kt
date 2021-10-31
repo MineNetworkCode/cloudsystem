@@ -10,8 +10,11 @@ import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
 import systems.beemo.cloudsystem.worker.network.NetworkClientImpl
+import kotlin.system.exitProcess
 
 class CloudSystemWorker {
+
+    private val logger: Logger = LoggerFactory.getLogger(CloudSystemWorker::class.java)
 
     companion object {
         lateinit var KODEIN: DI
@@ -36,6 +39,14 @@ class CloudSystemWorker {
             bind<PacketRegistry>() with singleton { PacketRegistry() }
 
             bind<NetworkClientImpl>() with singleton { NetworkClientImpl(instance(), instance()) }
+        }
+    }
+
+    private fun checkForRoot(args: Array<String>) {
+        if (System.getProperty("user.name") == "root" && !args.contains("--enable-root")) {
+            logger.error("Please consider not to use the \"root\" user for security reasons!")
+            logger.error("If you want to use it anyway, at your own risk, add \"--enable-root\" to the start arguments.")
+            exitProcess(0)
         }
     }
 

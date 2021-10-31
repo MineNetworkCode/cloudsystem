@@ -14,12 +14,16 @@ import kotlin.system.exitProcess
 
 class CloudSystemMaster {
 
+    private val logger: Logger = LoggerFactory.getLogger(CloudSystemMaster::class.java)
+
     companion object {
         lateinit var KODEIN: DI
     }
 
     fun start(args: Array<String>) {
         this.prepareDI()
+        this.checkForRoot(args)
+
         this.startNetworkServer()
     }
 
@@ -40,9 +44,16 @@ class CloudSystemMaster {
         }
     }
 
+    private fun checkForRoot(args: Array<String>) {
+        if (System.getProperty("user.name") == "root" && !args.contains("--enable-root")) {
+            logger.error("Please consider not to use the \"root\" user for security reasons!")
+            logger.error("If you want to use it anyway, at your own risk, add \"--enable-root\" to the start arguments.")
+            exitProcess(0)
+        }
+    }
+
     private fun startNetworkServer() {
         val networkServer: NetworkServerImpl by KODEIN.instance()
-        val logger: Logger = LoggerFactory.getLogger(CloudSystemMaster::class.java)
 
         networkServer.startServer(1337) {
             if (it) logger.info("Network Server started and was bound to 127.0.0.1:1337")
