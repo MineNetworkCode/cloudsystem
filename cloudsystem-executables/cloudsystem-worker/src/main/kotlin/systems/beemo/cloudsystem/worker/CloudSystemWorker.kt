@@ -7,9 +7,12 @@ import org.kodein.di.singleton
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
+import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
 import systems.beemo.cloudsystem.worker.network.NetworkClientImpl
+import systems.beemo.cloudsystem.worker.network.protocol.outgoing.PacketOutWorkerRequestConnection
+import systems.beemo.cloudsystem.worker.network.utils.NetworkUtils
 import kotlin.system.exitProcess
 
 class CloudSystemWorker {
@@ -38,7 +41,15 @@ class CloudSystemWorker {
             bind<ThreadPool>() with singleton { ThreadPool() }
 
             bind<NettyHelper>() with singleton { NettyHelper() }
-            bind<PacketRegistry>() with singleton { PacketRegistry() }
+            bind<NetworkUtils>() with singleton { NetworkUtils() }
+
+            bind<PacketRegistry>() with singleton {
+                val packetRegistry = PacketRegistry()
+
+                packetRegistry.registerOutgoingPacket(PacketId.PACKET_REQUEST_CONNECTION, PacketOutWorkerRequestConnection::class.java)
+
+                packetRegistry
+            }
 
             bind<NetworkClientImpl>() with singleton { NetworkClientImpl(instance(), instance()) }
         }
