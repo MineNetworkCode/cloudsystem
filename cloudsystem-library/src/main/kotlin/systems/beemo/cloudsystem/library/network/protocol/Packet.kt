@@ -7,5 +7,5 @@ interface Packet {
 
     fun read(document: Document) {}
     fun write(): Document = Document().appendString("message", "no_data")
-    fun handle(channelHandlerContext: ChannelHandlerContext)
+    fun handle(channelHandlerContext: ChannelHandlerContext) {}
 }

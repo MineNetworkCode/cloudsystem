@@ -7,9 +7,14 @@ import org.kodein.di.singleton
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
+import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
 import systems.beemo.cloudsystem.master.network.NetworkServerImpl
+import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerRequestConnection
+import systems.beemo.cloudsystem.master.network.protocol.outgoing.PacketOutWorkerConnectionEstablished
+import systems.beemo.cloudsystem.master.network.utils.NetworkUtils
+import systems.beemo.cloudsystem.master.worker.WorkerRegistry
 import kotlin.system.exitProcess
 
 class CloudSystemMaster {
@@ -18,6 +23,8 @@ class CloudSystemMaster {
 
     companion object {
         lateinit var KODEIN: DI
+
+        const val SECRET_KEY: String = "yey"
     }
 
     fun start(args: Array<String>) {
@@ -40,7 +47,17 @@ class CloudSystemMaster {
             bind<ThreadPool>() with singleton { ThreadPool() }
 
             bind<NettyHelper>() with singleton { NettyHelper() }
-            bind<PacketRegistry>() with singleton { PacketRegistry() }
+            bind<NetworkUtils>() with singleton { NetworkUtils() }
+
+            bind<WorkerRegistry>() with singleton { WorkerRegistry() }
+            bind<PacketRegistry>() with singleton {
+                val packetRegistry = PacketRegistry()
+
+                packetRegistry.registerIncomingPacket(PacketId.PACKET_REQUEST_CONNECTION, PacketInWorkerRequestConnection::class.java)
+                packetRegistry.registerOutgoingPacket(PacketId.PACKET_ESTABLISHED_CONNECTION, PacketOutWorkerConnectionEstablished::class.java)
+
+                packetRegistry
+            }
 
             bind<NetworkServerImpl>() with singleton { NetworkServerImpl(instance(), instance()) }
         }

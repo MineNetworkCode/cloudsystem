@@ -8,13 +8,13 @@
         </encoder>
     </appender>
 
-    <property name="HOME_LOG" value="config/master/logs/latest.log"/>
+    <property name="HOME_LOG" value="app/master/logs/latest.log"/>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${HOME_LOG}</file>
 
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>config/master/logs/archived/latest.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>app/master/logs/archived/latest.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>10MB</maxFileSize>
             <totalSizeCap>20GB</totalSizeCap>
             <maxHistory>60</maxHistory>
