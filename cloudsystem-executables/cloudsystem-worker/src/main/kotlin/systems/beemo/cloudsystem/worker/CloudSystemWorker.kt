@@ -6,10 +6,12 @@ import org.kodein.di.instance
 import org.kodein.di.singleton
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import systems.beemo.cloudsystem.library.configuration.ConfigurationLoader
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
+import systems.beemo.cloudsystem.worker.configuration.DefaultFolderCreator
 import systems.beemo.cloudsystem.worker.network.NetworkClientImpl
 import systems.beemo.cloudsystem.worker.network.protocol.incoming.PacketInWorkerConnectionEstablished
 import systems.beemo.cloudsystem.worker.network.protocol.outgoing.PacketOutWorkerRequestConnection
@@ -30,6 +32,7 @@ class CloudSystemWorker {
         this.prepareDI()
         this.checkForRoot(args)
 
+        this.executeConfigurations()
         this.startNetworkClient()
     }
 
@@ -47,6 +50,14 @@ class CloudSystemWorker {
 
             bind<NettyHelper>() with singleton { NettyHelper() }
             bind<NetworkUtils>() with singleton { NetworkUtils() }
+
+            bind<ConfigurationLoader>() with singleton {
+                val configurationLoader = ConfigurationLoader()
+
+                configurationLoader.registerConfiguration(DefaultFolderCreator())
+
+                configurationLoader
+            }
 
             bind<PacketRegistry>() with singleton {
                 val packetRegistry = PacketRegistry()
@@ -67,6 +78,11 @@ class CloudSystemWorker {
             logger.error("If you want to use it anyway, at your own risk, add \"--enable-root\" to the start arguments.")
             exitProcess(0)
         }
+    }
+
+    private fun executeConfigurations() {
+        val configurationLoader: ConfigurationLoader by KODEIN.instance()
+        configurationLoader.executeConfigurations()
     }
 
     private fun startNetworkClient() {
