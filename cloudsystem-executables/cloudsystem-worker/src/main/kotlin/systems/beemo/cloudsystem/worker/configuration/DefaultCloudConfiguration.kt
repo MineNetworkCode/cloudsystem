@@ -24,7 +24,9 @@ class DefaultCloudConfiguration : Configuration {
             val workerConfig = WorkerConfig(
                 cloudServerAddress = "127.0.0.1",
                 cloudServerPort = 8000,
-                workerName = "Worker-01",
+                workerName = "Worker",
+                delimiter = "-",
+                suffix = "01",
                 memory = workerDefaultMemory,
                 workerUuid = UUID.randomUUID().toString().replace("-", ""),
                 responsibleGroups = mutableListOf()

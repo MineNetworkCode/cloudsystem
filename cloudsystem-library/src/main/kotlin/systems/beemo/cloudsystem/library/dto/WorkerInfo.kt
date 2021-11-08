@@ -17,14 +17,14 @@ data class WorkerInfo(
     companion object {
         fun fromDocument(document: Document): WorkerInfo {
             return WorkerInfo(
-                document.getStringValue("uuid"),
-                document.getStringValue("name"),
-                document.getStringValue("delimiter"),
-                document.getStringValue("suffix"),
-                document.getLongValue("memory"),
-                document.getLongValue("currentMemoryConsumption"),
-                document.getDoubleValue("currentCpuConsumption"),
-                document.getList("responsibleGroups") as MutableList<String>
+                uuid = document.getStringValue("uuid"),
+                name = document.getStringValue("name"),
+                delimiter = document.getStringValue("delimiter"),
+                suffix = document.getStringValue("suffix"),
+                memory = document.getLongValue("memory"),
+                currentMemoryConsumption = document.getLongValue("currentMemoryConsumption"),
+                currentCpuConsumption = document.getDoubleValue("currentCpuConsumption"),
+                responsibleGroups = document.getList("responsibleGroups") as MutableList<String>
             )
         }
 

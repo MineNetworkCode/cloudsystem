@@ -40,11 +40,10 @@ class PacketInWorkerRequestConnection : Packet {
         if (!this.isWorkerAuthenticated(channelHandlerContext.channel())) {
             networkUtils.sendPacketAsync(
                 PacketOutWorkerConnectionEstablished(
-                    "You are not authenticated. Please check your key or the master config!",
-                    "null",
-                    false
-                ),
-                channelHandlerContext.channel()
+                    message = "You are not authenticated. Please check your key or the master config!",
+                    webKey = "null",
+                    successful = false
+                ), channelHandlerContext.channel()
             )
             logger.warn(
                 "Blocked connection of unauthenticated Worker:(Name=$workerName, Remote=${
@@ -58,8 +57,11 @@ class PacketInWorkerRequestConnection : Packet {
 
         if (!registered) {
             networkUtils.sendPacketAsync(
-                PacketOutWorkerConnectionEstablished("A worker with this uuid already exists!", "null", false),
-                channelHandlerContext.channel()
+                PacketOutWorkerConnectionEstablished(
+                    message = "A worker with this uuid already exists!",
+                    webKey = "null",
+                    successful = false
+                ), channelHandlerContext.channel()
             )
             logger.warn(
                 "Blocked connection of unauthenticated Worker:(Name=$workerName, Remote=${
@@ -71,8 +73,11 @@ class PacketInWorkerRequestConnection : Packet {
 
         networkUtils.sendPacketAsync(
             // TODO: Set right web key
-            PacketOutWorkerConnectionEstablished("Connection to master established!", "webKey", true),
-            channelHandlerContext.channel()
+            PacketOutWorkerConnectionEstablished(
+                message = "Connection to master established!",
+                webKey = "webKey",
+                successful = true
+            ), channelHandlerContext.channel()
         )
         logger.info(
             "New incoming connection of Worker:(Name=$workerName, Remote=${

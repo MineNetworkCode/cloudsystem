@@ -65,14 +65,8 @@ class CloudSystemWorker {
             bind<PacketRegistry>() with singleton {
                 val packetRegistry = PacketRegistry()
 
-                packetRegistry.registerOutgoingPacket(
-                    PacketId.PACKET_REQUEST_CONNECTION,
-                    PacketOutWorkerRequestConnection::class.java
-                )
-                packetRegistry.registerIncomingPacket(
-                    PacketId.PACKET_ESTABLISHED_CONNECTION,
-                    PacketInWorkerConnectionEstablished::class.java
-                )
+                packetRegistry.registerOutgoingPacket(PacketId.PACKET_REQUEST_CONNECTION, PacketOutWorkerRequestConnection::class.java)
+                packetRegistry.registerIncomingPacket(PacketId.PACKET_ESTABLISHED_CONNECTION, PacketInWorkerConnectionEstablished::class.java)
 
                 packetRegistry
             }
