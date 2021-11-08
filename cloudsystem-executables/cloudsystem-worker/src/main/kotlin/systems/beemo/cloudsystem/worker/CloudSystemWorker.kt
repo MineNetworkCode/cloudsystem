@@ -11,7 +11,9 @@ import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
+import systems.beemo.cloudsystem.worker.configuration.DefaultCloudConfiguration
 import systems.beemo.cloudsystem.worker.configuration.DefaultFolderCreator
+import systems.beemo.cloudsystem.worker.configuration.models.WorkerConfig
 import systems.beemo.cloudsystem.worker.network.NetworkClientImpl
 import systems.beemo.cloudsystem.worker.network.protocol.incoming.PacketInWorkerConnectionEstablished
 import systems.beemo.cloudsystem.worker.network.protocol.outgoing.PacketOutWorkerRequestConnection
@@ -24,7 +26,7 @@ class CloudSystemWorker {
 
     companion object {
         lateinit var KODEIN: DI
-
+        lateinit var WORKER_CONFIG: WorkerConfig
         lateinit var WEB_KEY: String
     }
 
@@ -55,6 +57,7 @@ class CloudSystemWorker {
                 val configurationLoader = ConfigurationLoader()
 
                 configurationLoader.registerConfiguration(DefaultFolderCreator())
+                configurationLoader.registerConfiguration(DefaultCloudConfiguration())
 
                 configurationLoader
             }
@@ -62,8 +65,14 @@ class CloudSystemWorker {
             bind<PacketRegistry>() with singleton {
                 val packetRegistry = PacketRegistry()
 
-                packetRegistry.registerOutgoingPacket(PacketId.PACKET_REQUEST_CONNECTION, PacketOutWorkerRequestConnection::class.java)
-                packetRegistry.registerIncomingPacket(PacketId.PACKET_ESTABLISHED_CONNECTION, PacketInWorkerConnectionEstablished::class.java)
+                packetRegistry.registerOutgoingPacket(
+                    PacketId.PACKET_REQUEST_CONNECTION,
+                    PacketOutWorkerRequestConnection::class.java
+                )
+                packetRegistry.registerIncomingPacket(
+                    PacketId.PACKET_ESTABLISHED_CONNECTION,
+                    PacketInWorkerConnectionEstablished::class.java
+                )
 
                 packetRegistry
             }
@@ -88,7 +97,7 @@ class CloudSystemWorker {
     private fun startNetworkClient() {
         val networkClient: NetworkClientImpl by KODEIN.instance()
 
-        networkClient.startClient("127.0.0.1", 1337)
+        networkClient.startClient(WORKER_CONFIG.cloudServerAddress, WORKER_CONFIG.cloudServerPort)
     }
 
     private fun shutdownThreads() {
