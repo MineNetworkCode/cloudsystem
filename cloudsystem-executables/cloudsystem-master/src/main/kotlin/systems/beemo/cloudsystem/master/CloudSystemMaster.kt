@@ -11,7 +11,9 @@ import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
+import systems.beemo.cloudsystem.master.configuration.DefaultCloudConfiguration
 import systems.beemo.cloudsystem.master.configuration.DefaultFolderCreator
+import systems.beemo.cloudsystem.master.configuration.models.MasterConfig
 import systems.beemo.cloudsystem.master.network.NetworkServerImpl
 import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerRequestConnection
 import systems.beemo.cloudsystem.master.network.protocol.outgoing.PacketOutWorkerConnectionEstablished
@@ -25,6 +27,7 @@ class CloudSystemMaster {
 
     companion object {
         lateinit var KODEIN: DI
+        lateinit var MASTER_CONFIG: MasterConfig
 
         const val SECRET_KEY: String = "yey"
     }
@@ -56,6 +59,7 @@ class CloudSystemMaster {
                 val configurationLoader = ConfigurationLoader()
 
                 configurationLoader.registerConfiguration(DefaultFolderCreator())
+                configurationLoader.registerConfiguration(DefaultCloudConfiguration())
 
                 configurationLoader
             }
@@ -90,8 +94,8 @@ class CloudSystemMaster {
     private fun startNetworkServer() {
         val networkServer: NetworkServerImpl by KODEIN.instance()
 
-        networkServer.startServer(1337) {
-            if (it) logger.info("Network Server started and was bound to 127.0.0.1:1337")
+        networkServer.startServer(MASTER_CONFIG.cloudServerPort) {
+            if (it) logger.info("Network Server started and was bound to 127.0.0.1:${MASTER_CONFIG.cloudServerPort}")
             else {
                 logger.error("Something went wrong while starting the server")
                 exitProcess(0)
