@@ -24,8 +24,6 @@ class NetworkHandler : SimpleChannelInboundHandler<Packet>() {
     }
 
     override fun channelActive(channelHandlerContext: ChannelHandlerContext) {
-        logger.info("Connected to master") // TODO: Better message and handle connection to master
-
         networkUtils.sendPacketAsync(
             PacketOutWorkerRequestConnection(
                 "yey",

@@ -1,5 +1,6 @@
 package systems.beemo.cloudsystem.library.dto
 
+import io.netty.channel.Channel
 import systems.beemo.cloudsystem.library.document.Document
 
 data class WorkerInfo(
@@ -10,7 +11,8 @@ data class WorkerInfo(
     val memory: Long,
     val currentMemoryConsumption: Long,
     val currentCpuConsumption: Double,
-    val responsibleGroups: MutableList<String>
+    val responsibleGroups: MutableList<String>,
+    var channel: Channel? = null // Might be null because we don't need it in the packets but in the master
 ) {
     companion object {
         fun fromDocument(document: Document): WorkerInfo {
