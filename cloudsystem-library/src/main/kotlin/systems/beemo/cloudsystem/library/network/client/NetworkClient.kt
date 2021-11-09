@@ -6,16 +6,20 @@ import io.netty.channel.ChannelInitializer
 import io.netty.channel.ChannelOption
 import io.netty.channel.EventLoopGroup
 import io.netty.handler.ssl.SslContext
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 
 abstract class NetworkClient(
     private val nettyHelper: NettyHelper
 ) {
 
+    private val logger: Logger = LoggerFactory.getLogger(NetworkClient::class.java)
+
     private lateinit var workerGroup: EventLoopGroup
 
     fun startClient(host: String, port: Int) {
-        workerGroup = nettyHelper.getEventLoopGroup()
+        workerGroup = nettyHelper.getEventLoopGroup("cloud-client")
 
         val sslContext = nettyHelper.createClientCert()
         val channelClass = nettyHelper.getClientChannelClass()
@@ -34,13 +38,13 @@ abstract class NetworkClient(
                             preparePipeline(sslContext, channel)
                         }
                     }).connect(host, port).channel().closeFuture().addListener {
-                        println("Network timeout! Reconnecting in 5 seconds...")
                         Thread.sleep(5000)
+                        logger.warn("Network timeout! Reconnecting in 5 seconds...")
 
                         this.startClient(host, port)
                     }.syncUninterruptibly()
             } catch (e: Exception) {
-                println(e)
+                logger.error(e.message)
             } finally {
                 workerGroup.shutdownGracefully()
             }

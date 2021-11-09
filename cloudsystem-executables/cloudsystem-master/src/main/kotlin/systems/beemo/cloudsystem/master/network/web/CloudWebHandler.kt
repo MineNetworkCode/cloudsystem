@@ -8,6 +8,8 @@ import io.netty.handler.stream.ChunkedFile
 import io.netty.util.CharsetUtil
 import io.netty.util.internal.SystemPropertyUtil
 import org.kodein.di.instance
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import systems.beemo.cloudsystem.library.utils.DirectoryConstants
 import systems.beemo.cloudsystem.master.CloudSystemMaster
 import systems.beemo.cloudsystem.master.network.web.router.Router
@@ -19,6 +21,8 @@ import java.util.regex.Pattern
 import javax.activation.MimetypesFileTypeMap
 
 class CloudWebHandler : SimpleChannelInboundHandler<FullHttpRequest>() {
+
+    private val logger: Logger = LoggerFactory.getLogger(CloudWebHandler::class.java)
 
     private val router: Router by CloudSystemMaster.KODEIN.instance()
 
@@ -131,7 +135,7 @@ class CloudWebHandler : SimpleChannelInboundHandler<FullHttpRequest>() {
     }
 
     override fun exceptionCaught(channelHandlerContext: ChannelHandlerContext, cause: Throwable) {
-        cause.printStackTrace()
+        logger.error(cause.message)
         if (channelHandlerContext.channel().isActive) {
             this.sendError(channelHandlerContext, HttpResponseStatus.INTERNAL_SERVER_ERROR)
             return

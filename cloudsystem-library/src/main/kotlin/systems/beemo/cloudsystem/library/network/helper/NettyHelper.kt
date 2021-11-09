@@ -14,13 +14,18 @@ import io.netty.handler.ssl.SslContext
 import io.netty.handler.ssl.SslContextBuilder
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
 import io.netty.handler.ssl.util.SelfSignedCertificate
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import systems.beemo.cloudsystem.library.threading.InternalThreadFactory
 import java.security.cert.CertificateException
 import javax.net.ssl.SSLException
 
 class NettyHelper {
 
-    fun getEventLoopGroup(): EventLoopGroup {
-        return if (this.isEpoll()) EpollEventLoopGroup() else NioEventLoopGroup()
+    private val logger: Logger = LoggerFactory.getLogger(NettyHelper::class.java)
+
+    fun getEventLoopGroup(threadPrefix: String): EventLoopGroup {
+        return if (this.isEpoll()) EpollEventLoopGroup(InternalThreadFactory(threadPrefix)) else NioEventLoopGroup(InternalThreadFactory(threadPrefix))
     }
 
     fun getClientChannelClass(): Class<out SocketChannel> {
@@ -39,9 +44,9 @@ class NettyHelper {
                 .trustManager(InsecureTrustManagerFactory.INSTANCE)
                 .build()
         } catch (e: CertificateException) {
-            e.printStackTrace()
+            logger.error(e.message)
         } catch (e: SSLException) {
-            e.printStackTrace()
+            logger.error(e.message)
         }
 
         return sslContext
@@ -57,9 +62,9 @@ class NettyHelper {
                 .forServer(selfSignedCertificate.certificate(), selfSignedCertificate.privateKey())
                 .build()
         } catch (e: CertificateException) {
-            e.printStackTrace()
+            logger.error(e.message)
         } catch (e: SSLException) {
-            e.printStackTrace()
+            logger.error(e.message)
         }
 
         return sslContext

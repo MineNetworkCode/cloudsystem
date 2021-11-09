@@ -4,19 +4,23 @@ import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.*
 import io.netty.handler.ssl.SslContext
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
-import java.util.function.Consumer
+import kotlin.system.exitProcess
 
 abstract class NetworkServer(
     private val nettyHelper: NettyHelper
 ) {
 
+    private val logger: Logger = LoggerFactory.getLogger(NetworkServer::class.java)
+
     private lateinit var bossGroup: EventLoopGroup
     private lateinit var workerGroup: EventLoopGroup
 
-    fun startServer(port: Int, callback: Consumer<Boolean>) {
-        bossGroup = nettyHelper.getEventLoopGroup()
-        workerGroup = nettyHelper.getEventLoopGroup()
+    fun startServer(port: Int) {
+        bossGroup = nettyHelper.getEventLoopGroup("cloud-server")
+        workerGroup = nettyHelper.getEventLoopGroup("cloud-server")
 
         val sslContext = nettyHelper.createServerCert()
         val channelClass = nettyHelper.getServerChannelClass()
@@ -39,12 +43,18 @@ abstract class NetworkServer(
                             preparePipeline(sslContext, channel)
                         }
                     }).bind(port)
-                    .addListener { callback.accept(it.isSuccess) }
+                    .addListener {
+                        if (it.isSuccess) logger.info("Network Server started and was bound to 127.0.0.1:$port")
+                        else {
+                            logger.error("Something went wrong while starting the server")
+                            exitProcess(0)
+                        }
+                    }
                     .addListener(ChannelFutureListener.CLOSE_ON_FAILURE)
                     .addListener(ChannelFutureListener.FIRE_EXCEPTION_ON_FAILURE)
                     .channel().closeFuture().syncUninterruptibly()
             } catch (e: Exception) {
-                callback.accept(false)
+                logger.error(e.message)
             } finally {
                 workerGroup.shutdownGracefully()
                 bossGroup.shutdownGracefully()
