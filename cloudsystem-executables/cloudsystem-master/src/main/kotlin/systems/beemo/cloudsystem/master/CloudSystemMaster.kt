@@ -19,6 +19,9 @@ import systems.beemo.cloudsystem.master.network.NetworkServerImpl
 import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerRequestConnection
 import systems.beemo.cloudsystem.master.network.protocol.outgoing.PacketOutWorkerConnectionEstablished
 import systems.beemo.cloudsystem.master.network.utils.NetworkUtils
+import systems.beemo.cloudsystem.master.network.web.CloudWebServer
+import systems.beemo.cloudsystem.master.network.web.router.Router
+import systems.beemo.cloudsystem.master.network.web.router.routes.MasterStatusRoute
 import systems.beemo.cloudsystem.master.worker.WorkerRegistry
 import kotlin.system.exitProcess
 
@@ -30,6 +33,7 @@ class CloudSystemMaster {
         lateinit var KODEIN: DI
         lateinit var MASTER_CONFIG: MasterConfig
         lateinit var SECRET_KEY: String
+        var WEB_KEY: String = "yey"
     }
 
     fun start(args: Array<String>) {
@@ -38,9 +42,12 @@ class CloudSystemMaster {
 
         this.executeConfigurations()
         this.startNetworkServer()
+        this.startWebServer()
     }
 
     fun shutdownGracefully() {
+        this.shutdownNetworkServer()
+        this.shutdownWebServer()
         this.shutdownThreads()
 
         logger.info("Thank you for your trust in us. See ya next time!")
@@ -75,7 +82,16 @@ class CloudSystemMaster {
                 packetRegistry
             }
 
+            bind<Router>() with singleton {
+                val router = Router()
+
+                router.registerRoute("/status", MasterStatusRoute())
+
+                router
+            }
+
             bind<NetworkServerImpl>() with singleton { NetworkServerImpl(instance(), instance()) }
+            bind<CloudWebServer>() with singleton { CloudWebServer() }
         }
     }
 
@@ -102,6 +118,21 @@ class CloudSystemMaster {
                 exitProcess(0)
             }
         }
+    }
+
+    private fun startWebServer() {
+        val cloudWebServer: CloudWebServer by KODEIN.instance()
+        cloudWebServer.startServer()
+    }
+
+    private fun shutdownWebServer() {
+        val cloudWebServer: CloudWebServer by KODEIN.instance()
+        cloudWebServer.shutdownGracefully()
+    }
+
+    private fun shutdownNetworkServer() {
+        val networkServer: NetworkServerImpl by KODEIN.instance()
+        networkServer.shutdownGracefully()
     }
 
     private fun shutdownThreads() {

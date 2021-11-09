@@ -41,6 +41,7 @@ class CloudSystemWorker {
     }
 
     fun shutdownGracefully() {
+        this.shutdownNetworkClient()
         this.shutdownThreads()
 
         logger.info("Thank you for your trust in us. See ya next time!")
@@ -93,8 +94,12 @@ class CloudSystemWorker {
 
     private fun startNetworkClient() {
         val networkClient: NetworkClientImpl by KODEIN.instance()
-
         networkClient.startClient(WORKER_CONFIG.cloudServerAddress, WORKER_CONFIG.cloudServerPort)
+    }
+
+    private fun shutdownNetworkClient() {
+        val networkClient: NetworkClientImpl by KODEIN.instance()
+        networkClient.shutdownGracefully()
     }
 
     private fun shutdownThreads() {

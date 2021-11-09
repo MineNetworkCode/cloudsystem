@@ -47,5 +47,9 @@ abstract class NetworkClient(
         }, "cloudsystem-client").start()
     }
 
+    fun shutdownGracefully() {
+        workerGroup.shutdownGracefully()
+    }
+
     abstract fun preparePipeline(sslContext: SslContext?, channel: Channel)
 }
