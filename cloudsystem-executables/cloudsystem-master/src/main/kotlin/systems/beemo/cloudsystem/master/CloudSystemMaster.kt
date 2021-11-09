@@ -6,10 +6,15 @@ import org.kodein.di.instance
 import org.kodein.di.singleton
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import systems.beemo.cloudsystem.library.configuration.ConfigurationLoader
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
+import systems.beemo.cloudsystem.master.configuration.DefaultCloudConfiguration
+import systems.beemo.cloudsystem.master.configuration.DefaultFolderCreator
+import systems.beemo.cloudsystem.master.configuration.WorkerKeyCreator
+import systems.beemo.cloudsystem.master.configuration.models.MasterConfig
 import systems.beemo.cloudsystem.master.network.NetworkServerImpl
 import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerRequestConnection
 import systems.beemo.cloudsystem.master.network.protocol.outgoing.PacketOutWorkerConnectionEstablished
@@ -23,14 +28,15 @@ class CloudSystemMaster {
 
     companion object {
         lateinit var KODEIN: DI
-
-        const val SECRET_KEY: String = "yey"
+        lateinit var MASTER_CONFIG: MasterConfig
+        lateinit var SECRET_KEY: String
     }
 
     fun start(args: Array<String>) {
         this.prepareDI()
         this.checkForRoot(args)
 
+        this.executeConfigurations()
         this.startNetworkServer()
     }
 
@@ -48,6 +54,16 @@ class CloudSystemMaster {
 
             bind<NettyHelper>() with singleton { NettyHelper() }
             bind<NetworkUtils>() with singleton { NetworkUtils() }
+
+            bind<ConfigurationLoader>() with singleton {
+                val configurationLoader = ConfigurationLoader()
+
+                configurationLoader.registerConfiguration(DefaultFolderCreator())
+                configurationLoader.registerConfiguration(DefaultCloudConfiguration())
+                configurationLoader.registerConfiguration(WorkerKeyCreator())
+
+                configurationLoader
+            }
 
             bind<WorkerRegistry>() with singleton { WorkerRegistry() }
             bind<PacketRegistry>() with singleton {
@@ -71,11 +87,16 @@ class CloudSystemMaster {
         }
     }
 
+    private fun executeConfigurations() {
+        val configurationLoader: ConfigurationLoader by KODEIN.instance()
+        configurationLoader.executeConfigurations()
+    }
+
     private fun startNetworkServer() {
         val networkServer: NetworkServerImpl by KODEIN.instance()
 
-        networkServer.startServer(1337) {
-            if (it) logger.info("Network Server started and was bound to 127.0.0.1:1337")
+        networkServer.startServer(MASTER_CONFIG.cloudServerPort) {
+            if (it) logger.info("Network Server started and was bound to 127.0.0.1:${MASTER_CONFIG.cloudServerPort}")
             else {
                 logger.error("Something went wrong while starting the server")
                 exitProcess(0)

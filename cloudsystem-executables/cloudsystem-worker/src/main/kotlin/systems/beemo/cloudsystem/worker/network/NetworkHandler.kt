@@ -3,19 +3,14 @@ package systems.beemo.cloudsystem.worker.network
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import org.kodein.di.instance
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import systems.beemo.cloudsystem.library.dto.WorkerInfo
 import systems.beemo.cloudsystem.library.network.protocol.Packet
 import systems.beemo.cloudsystem.library.utils.HardwareUtils
 import systems.beemo.cloudsystem.worker.CloudSystemWorker
 import systems.beemo.cloudsystem.worker.network.protocol.outgoing.PacketOutWorkerRequestConnection
 import systems.beemo.cloudsystem.worker.network.utils.NetworkUtils
-import java.util.*
 
 class NetworkHandler : SimpleChannelInboundHandler<Packet>() {
-
-    private val logger: Logger = LoggerFactory.getLogger(NetworkHandler::class.java)
 
     private val networkUtils: NetworkUtils by CloudSystemWorker.KODEIN.instance()
 
@@ -26,13 +21,16 @@ class NetworkHandler : SimpleChannelInboundHandler<Packet>() {
     override fun channelActive(channelHandlerContext: ChannelHandlerContext) {
         networkUtils.sendPacketAsync(
             PacketOutWorkerRequestConnection(
-                "yey",
-                WorkerInfo(
-                    UUID.randomUUID().toString(), "Worker", "-", "01",
-                    HardwareUtils.getSystemMemory(),
-                    HardwareUtils.getMemoryUsage(),
-                    HardwareUtils.getCpuUsage(),
-                    mutableListOf("Lobby", "Proxy")
+                secretKey = CloudSystemWorker.SECRET_KEY,
+                workerInfo = WorkerInfo(
+                    uuid = CloudSystemWorker.WORKER_CONFIG.workerUuid,
+                    name = CloudSystemWorker.WORKER_CONFIG.workerName,
+                    delimiter = CloudSystemWorker.WORKER_CONFIG.delimiter,
+                    suffix = CloudSystemWorker.WORKER_CONFIG.suffix,
+                    memory = CloudSystemWorker.WORKER_CONFIG.memory,
+                    currentMemoryConsumption = HardwareUtils.getMemoryUsage(),
+                    currentCpuConsumption = HardwareUtils.getCpuUsage(),
+                    responsibleGroups = CloudSystemWorker.WORKER_CONFIG.responsibleGroups
                 )
             ), channelHandlerContext.channel()
         )

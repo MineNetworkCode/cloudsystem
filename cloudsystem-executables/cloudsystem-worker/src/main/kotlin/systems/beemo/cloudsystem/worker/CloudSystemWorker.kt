@@ -6,10 +6,15 @@ import org.kodein.di.instance
 import org.kodein.di.singleton
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import systems.beemo.cloudsystem.library.configuration.ConfigurationLoader
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
+import systems.beemo.cloudsystem.worker.configuration.DefaultCloudConfiguration
+import systems.beemo.cloudsystem.worker.configuration.DefaultFolderCreator
+import systems.beemo.cloudsystem.worker.configuration.WorkerKeyReader
+import systems.beemo.cloudsystem.worker.configuration.models.WorkerConfig
 import systems.beemo.cloudsystem.worker.network.NetworkClientImpl
 import systems.beemo.cloudsystem.worker.network.protocol.incoming.PacketInWorkerConnectionEstablished
 import systems.beemo.cloudsystem.worker.network.protocol.outgoing.PacketOutWorkerRequestConnection
@@ -22,7 +27,8 @@ class CloudSystemWorker {
 
     companion object {
         lateinit var KODEIN: DI
-
+        lateinit var WORKER_CONFIG: WorkerConfig
+        lateinit var SECRET_KEY: String
         lateinit var WEB_KEY: String
     }
 
@@ -30,6 +36,7 @@ class CloudSystemWorker {
         this.prepareDI()
         this.checkForRoot(args)
 
+        this.executeConfigurations()
         this.startNetworkClient()
     }
 
@@ -47,6 +54,16 @@ class CloudSystemWorker {
 
             bind<NettyHelper>() with singleton { NettyHelper() }
             bind<NetworkUtils>() with singleton { NetworkUtils() }
+
+            bind<ConfigurationLoader>() with singleton {
+                val configurationLoader = ConfigurationLoader()
+
+                configurationLoader.registerConfiguration(DefaultFolderCreator())
+                configurationLoader.registerConfiguration(DefaultCloudConfiguration())
+                configurationLoader.registerConfiguration(WorkerKeyReader())
+
+                configurationLoader
+            }
 
             bind<PacketRegistry>() with singleton {
                 val packetRegistry = PacketRegistry()
@@ -69,10 +86,15 @@ class CloudSystemWorker {
         }
     }
 
+    private fun executeConfigurations() {
+        val configurationLoader: ConfigurationLoader by KODEIN.instance()
+        configurationLoader.executeConfigurations()
+    }
+
     private fun startNetworkClient() {
         val networkClient: NetworkClientImpl by KODEIN.instance()
 
-        networkClient.startClient("127.0.0.1", 1337)
+        networkClient.startClient(WORKER_CONFIG.cloudServerAddress, WORKER_CONFIG.cloudServerPort)
     }
 
     private fun shutdownThreads() {

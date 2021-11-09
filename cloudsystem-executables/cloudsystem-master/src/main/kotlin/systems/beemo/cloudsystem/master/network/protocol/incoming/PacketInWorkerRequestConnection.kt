@@ -36,15 +36,13 @@ class PacketInWorkerRequestConnection : Packet {
         workerInfo.channel = channelHandlerContext.channel()
         val workerName = "${workerInfo.name}${workerInfo.delimiter}${workerInfo.suffix}"
 
-        // TODO: do right authentication
-        if (!this.isWorkerAuthenticated(channelHandlerContext.channel())) {
+        if (!this.isWorkerAuthenticated(channelHandlerContext.channel(), workerName)) {
             networkUtils.sendPacketAsync(
                 PacketOutWorkerConnectionEstablished(
-                    "You are not authenticated. Please check your key or the master config!",
-                    "null",
-                    false
-                ),
-                channelHandlerContext.channel()
+                    message = "You are not authenticated. Please check your key or the master config!",
+                    webKey = "null",
+                    successful = false
+                ), channelHandlerContext.channel()
             )
             logger.warn(
                 "Blocked connection of unauthenticated Worker:(Name=$workerName, Remote=${
@@ -58,8 +56,11 @@ class PacketInWorkerRequestConnection : Packet {
 
         if (!registered) {
             networkUtils.sendPacketAsync(
-                PacketOutWorkerConnectionEstablished("A worker with this uuid already exists!", "null", false),
-                channelHandlerContext.channel()
+                PacketOutWorkerConnectionEstablished(
+                    message = "A worker with this uuid already exists!",
+                    webKey = "null",
+                    successful = false
+                ), channelHandlerContext.channel()
             )
             logger.warn(
                 "Blocked connection of unauthenticated Worker:(Name=$workerName, Remote=${
@@ -71,8 +72,11 @@ class PacketInWorkerRequestConnection : Packet {
 
         networkUtils.sendPacketAsync(
             // TODO: Set right web key
-            PacketOutWorkerConnectionEstablished("Connection to master established!", "webKey", true),
-            channelHandlerContext.channel()
+            PacketOutWorkerConnectionEstablished(
+                message = "Connection to master established!",
+                webKey = "webKey",
+                successful = true
+            ), channelHandlerContext.channel()
         )
         logger.info(
             "New incoming connection of Worker:(Name=$workerName, Remote=${
@@ -83,9 +87,25 @@ class PacketInWorkerRequestConnection : Packet {
         // TODO: Request processes
     }
 
-    private fun isWorkerAuthenticated(channel: Channel): Boolean {
+    private fun isWorkerAuthenticated(channel: Channel, workerName: String): Boolean {
         if (!verified) return false
 
-        return true
+        var returnValue = false
+        val validWorkers = CloudSystemMaster.MASTER_CONFIG.validWorkers
+
+        validWorkers.forEach {
+            val validWorkerName = it.workerName
+            val validWorkerWhitelistedIps = it.whitelistedIps
+
+            if (validWorkerName == workerName) {
+                val workerIpAddress = channel.remoteAddress().toString().replace("/", "").split(":")[0]
+
+                if (validWorkerWhitelistedIps.contains(workerIpAddress)) {
+                    returnValue = true
+                }
+            }
+        }
+
+        return returnValue
     }
 }
