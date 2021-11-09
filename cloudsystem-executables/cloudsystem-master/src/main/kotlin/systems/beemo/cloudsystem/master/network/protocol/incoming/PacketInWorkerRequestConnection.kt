@@ -36,8 +36,7 @@ class PacketInWorkerRequestConnection : Packet {
         workerInfo.channel = channelHandlerContext.channel()
         val workerName = "${workerInfo.name}${workerInfo.delimiter}${workerInfo.suffix}"
 
-        // TODO: do right authentication
-        if (!this.isWorkerAuthenticated(channelHandlerContext.channel())) {
+        if (!this.isWorkerAuthenticated(channelHandlerContext.channel(), workerName)) {
             networkUtils.sendPacketAsync(
                 PacketOutWorkerConnectionEstablished(
                     message = "You are not authenticated. Please check your key or the master config!",
@@ -88,9 +87,25 @@ class PacketInWorkerRequestConnection : Packet {
         // TODO: Request processes
     }
 
-    private fun isWorkerAuthenticated(channel: Channel): Boolean {
+    private fun isWorkerAuthenticated(channel: Channel, workerName: String): Boolean {
         if (!verified) return false
 
-        return true
+        var returnValue = false
+        val validWorkers = CloudSystemMaster.MASTER_CONFIG.validWorkers
+
+        validWorkers.forEach {
+            val validWorkerName = it.workerName
+            val validWorkerWhitelistedIps = it.whitelistedIps
+
+            if (validWorkerName == workerName) {
+                val workerIpAddress = channel.remoteAddress().toString().replace("/", "").split(":")[0]
+
+                if (validWorkerWhitelistedIps.contains(workerIpAddress)) {
+                    returnValue = true
+                }
+            }
+        }
+
+        return returnValue
     }
 }

@@ -21,7 +21,7 @@ class NetworkHandler : SimpleChannelInboundHandler<Packet>() {
     override fun channelActive(channelHandlerContext: ChannelHandlerContext) {
         networkUtils.sendPacketAsync(
             PacketOutWorkerRequestConnection(
-                secretKey = "yey",
+                secretKey = CloudSystemWorker.SECRET_KEY,
                 workerInfo = WorkerInfo(
                     uuid = CloudSystemWorker.WORKER_CONFIG.workerUuid,
                     name = CloudSystemWorker.WORKER_CONFIG.workerName,

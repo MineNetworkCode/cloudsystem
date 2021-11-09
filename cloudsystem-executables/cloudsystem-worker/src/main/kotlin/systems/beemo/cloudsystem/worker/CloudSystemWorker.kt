@@ -13,6 +13,7 @@ import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
 import systems.beemo.cloudsystem.worker.configuration.DefaultCloudConfiguration
 import systems.beemo.cloudsystem.worker.configuration.DefaultFolderCreator
+import systems.beemo.cloudsystem.worker.configuration.WorkerKeyReader
 import systems.beemo.cloudsystem.worker.configuration.models.WorkerConfig
 import systems.beemo.cloudsystem.worker.network.NetworkClientImpl
 import systems.beemo.cloudsystem.worker.network.protocol.incoming.PacketInWorkerConnectionEstablished
@@ -27,6 +28,7 @@ class CloudSystemWorker {
     companion object {
         lateinit var KODEIN: DI
         lateinit var WORKER_CONFIG: WorkerConfig
+        lateinit var SECRET_KEY: String
         lateinit var WEB_KEY: String
     }
 
@@ -58,6 +60,7 @@ class CloudSystemWorker {
 
                 configurationLoader.registerConfiguration(DefaultFolderCreator())
                 configurationLoader.registerConfiguration(DefaultCloudConfiguration())
+                configurationLoader.registerConfiguration(WorkerKeyReader())
 
                 configurationLoader
             }

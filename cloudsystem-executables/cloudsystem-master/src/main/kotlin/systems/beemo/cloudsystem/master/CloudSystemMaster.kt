@@ -13,6 +13,7 @@ import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
 import systems.beemo.cloudsystem.master.configuration.DefaultCloudConfiguration
 import systems.beemo.cloudsystem.master.configuration.DefaultFolderCreator
+import systems.beemo.cloudsystem.master.configuration.WorkerKeyCreator
 import systems.beemo.cloudsystem.master.configuration.models.MasterConfig
 import systems.beemo.cloudsystem.master.network.NetworkServerImpl
 import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerRequestConnection
@@ -28,8 +29,7 @@ class CloudSystemMaster {
     companion object {
         lateinit var KODEIN: DI
         lateinit var MASTER_CONFIG: MasterConfig
-
-        const val SECRET_KEY: String = "yey"
+        lateinit var SECRET_KEY: String
     }
 
     fun start(args: Array<String>) {
@@ -60,6 +60,7 @@ class CloudSystemMaster {
 
                 configurationLoader.registerConfiguration(DefaultFolderCreator())
                 configurationLoader.registerConfiguration(DefaultCloudConfiguration())
+                configurationLoader.registerConfiguration(WorkerKeyCreator())
 
                 configurationLoader
             }
