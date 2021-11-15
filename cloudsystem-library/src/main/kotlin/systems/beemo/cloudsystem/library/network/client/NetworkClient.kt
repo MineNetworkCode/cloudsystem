@@ -37,12 +37,7 @@ abstract class NetworkClient(
                         override fun initChannel(channel: Channel) {
                             preparePipeline(sslContext, channel)
                         }
-                    }).connect(host, port).channel().closeFuture().addListener {
-                        Thread.sleep(5000)
-                        logger.warn("Network timeout! Reconnecting in 5 seconds...")
-
-                        this.startClient(host, port)
-                    }.syncUninterruptibly()
+                    }).connect(host, port).channel().closeFuture().syncUninterruptibly()
             } catch (e: Exception) {
                 logger.error(e.message)
             } finally {
