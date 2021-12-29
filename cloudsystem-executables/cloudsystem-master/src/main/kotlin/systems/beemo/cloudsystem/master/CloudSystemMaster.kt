@@ -6,11 +6,13 @@ import org.kodein.di.instance
 import org.kodein.di.singleton
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import systems.beemo.cloudsystem.library.command.CommandManager
 import systems.beemo.cloudsystem.library.configuration.ConfigurationLoader
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
+import systems.beemo.cloudsystem.master.commands.HelpCommand
 import systems.beemo.cloudsystem.master.configuration.DefaultCloudConfiguration
 import systems.beemo.cloudsystem.master.configuration.DefaultFolderCreator
 import systems.beemo.cloudsystem.master.configuration.WebKeyCreator
@@ -42,11 +44,13 @@ class CloudSystemMaster {
         this.checkForRoot(args)
 
         this.executeConfigurations()
+        this.startCommandRunner()
         this.startNetworkServer()
         this.startWebServer()
     }
 
     fun shutdownGracefully() {
+        this.shutdownCommandRunner()
         this.shutdownNetworkServer()
         this.shutdownWebServer()
         this.shutdownThreads()
@@ -72,6 +76,14 @@ class CloudSystemMaster {
                 configurationLoader.registerConfiguration(WebKeyCreator())
 
                 configurationLoader
+            }
+
+            bind<CommandManager>() with singleton {
+                val commandManager = CommandManager(instance())
+
+                commandManager.registerCommand(HelpCommand(commandManager))
+
+                commandManager
             }
 
             bind<WorkerRegistry>() with singleton { WorkerRegistry() }
@@ -110,6 +122,11 @@ class CloudSystemMaster {
         configurationLoader.executeConfigurations()
     }
 
+    private fun startCommandRunner() {
+        val commandManager: CommandManager by KODEIN.instance()
+        commandManager.start()
+    }
+
     private fun startNetworkServer() {
         val networkServer: NetworkServerImpl by KODEIN.instance()
         networkServer.startServer(MASTER_CONFIG.cloudServerPort)
@@ -118,6 +135,11 @@ class CloudSystemMaster {
     private fun startWebServer() {
         val cloudWebServer: CloudWebServerImpl by KODEIN.instance()
         cloudWebServer.startServer(MASTER_CONFIG.webServerPort)
+    }
+
+    private fun shutdownCommandRunner() {
+        val commandManager: CommandManager by KODEIN.instance()
+        commandManager.stop()
     }
 
     private fun shutdownWebServer() {

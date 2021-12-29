@@ -6,11 +6,13 @@ import org.kodein.di.instance
 import org.kodein.di.singleton
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import systems.beemo.cloudsystem.library.command.CommandManager
 import systems.beemo.cloudsystem.library.configuration.ConfigurationLoader
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
+import systems.beemo.cloudsystem.worker.commands.HelpCommand
 import systems.beemo.cloudsystem.worker.configuration.DefaultCloudConfiguration
 import systems.beemo.cloudsystem.worker.configuration.DefaultFolderCreator
 import systems.beemo.cloudsystem.worker.configuration.WorkerKeyReader
@@ -37,10 +39,12 @@ class CloudSystemWorker {
         this.checkForRoot(args)
 
         this.executeConfigurations()
+        this.startCommandRunner()
         this.startNetworkClient()
     }
 
     fun shutdownGracefully() {
+        this.shutdownCommandRunner()
         this.shutdownNetworkClient()
         this.shutdownThreads()
 
@@ -64,6 +68,14 @@ class CloudSystemWorker {
                 configurationLoader.registerConfiguration(WorkerKeyReader())
 
                 configurationLoader
+            }
+
+            bind<CommandManager>() with singleton {
+                val commandManager = CommandManager(instance())
+
+                commandManager.registerCommand(HelpCommand(commandManager))
+
+                commandManager
             }
 
             bind<PacketRegistry>() with singleton {
@@ -92,9 +104,19 @@ class CloudSystemWorker {
         configurationLoader.executeConfigurations()
     }
 
+    private fun startCommandRunner() {
+        val commandManager: CommandManager by KODEIN.instance()
+        commandManager.start()
+    }
+
     private fun startNetworkClient() {
         val networkClient: NetworkClientImpl by KODEIN.instance()
         networkClient.startClient(WORKER_CONFIG.cloudServerAddress, WORKER_CONFIG.cloudServerPort)
+    }
+
+    private fun shutdownCommandRunner() {
+        val commandManager: CommandManager by KODEIN.instance()
+        commandManager.stop()
     }
 
     private fun shutdownNetworkClient() {
