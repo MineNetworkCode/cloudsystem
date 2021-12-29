@@ -1,33 +1,34 @@
-package systems.beemo.cloudsystem.library.network.server
+package systems.beemo.cloudsystem.library.network.web
 
 import io.netty.bootstrap.ServerBootstrap
 import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.*
-import io.netty.handler.ssl.SslContext
+import io.netty.channel.epoll.Epoll
+import io.netty.channel.epoll.EpollServerSocketChannel
+import io.netty.channel.socket.nio.NioServerSocketChannel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import kotlin.system.exitProcess
 
-abstract class NetworkServer(
+abstract class CloudWebServer(
     private val nettyHelper: NettyHelper
 ) {
 
-    private val logger: Logger = LoggerFactory.getLogger(NetworkServer::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(CloudWebServer::class.java)
 
-    private lateinit var bossGroup: EventLoopGroup
     private lateinit var workerGroup: EventLoopGroup
 
     fun startServer(port: Int) {
-        bossGroup = nettyHelper.getEventLoopGroup("cloud-server")
-        workerGroup = nettyHelper.getEventLoopGroup("cloud-server")
+        val epoll = Epoll.isAvailable()
 
-        val sslContext = nettyHelper.createServerCert()
-        val channelClass = nettyHelper.getServerChannelClass()
+        workerGroup = nettyHelper.getEventLoopGroup("web-server")
+
+        val rightChannelClass = if (epoll) EpollServerSocketChannel::class.java else NioServerSocketChannel::class.java
 
         Thread({
             try {
-                ServerBootstrap().group(bossGroup, workerGroup)
+                ServerBootstrap().group(workerGroup)
                     .childOption(ChannelOption.SO_KEEPALIVE, true)
                     .childOption(ChannelOption.IP_TOS, 24)
                     .childOption(ChannelOption.TCP_NODELAY, true)
@@ -37,16 +38,17 @@ abstract class NetworkServer(
                     .option(ChannelOption.ALLOCATOR, ByteBufAllocator.DEFAULT)
                     .option(ChannelOption.AUTO_READ, true)
 
-                    .channel(channelClass)
+                    .channel(rightChannelClass)
                     .childHandler(object : ChannelInitializer<Channel>() {
                         override fun initChannel(channel: Channel) {
-                            preparePipeline(sslContext, channel)
+                            preparePipeline(channel)
                         }
                     }).bind(port)
                     .addListener {
-                        if (it.isSuccess) logger.info("Network Server started and was bound to 127.0.0.1:$port")
-                        else {
-                            logger.error("Something went wrong while starting the server")
+                        if (it.isSuccess) {
+                            logger.info("Web Server started and was bound to 127.0.0.1:$port")
+                        } else {
+                            logger.error("Something went wrong while starting the web server")
                             exitProcess(0)
                         }
                     }
@@ -57,15 +59,13 @@ abstract class NetworkServer(
                 logger.error(e.message)
             } finally {
                 workerGroup.shutdownGracefully()
-                bossGroup.shutdownGracefully()
             }
-        }, "cloudsystem-server").start()
+        }, "cloudsystem-webserver").start()
     }
 
     fun shutdownGracefully() {
         workerGroup.shutdownGracefully()
-        bossGroup.shutdownGracefully()
     }
 
-    abstract fun preparePipeline(sslContext: SslContext?, channel: Channel)
+    abstract fun preparePipeline(channel: Channel)
 }

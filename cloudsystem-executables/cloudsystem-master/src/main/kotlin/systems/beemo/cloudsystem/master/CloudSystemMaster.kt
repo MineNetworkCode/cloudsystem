@@ -13,12 +13,16 @@ import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
 import systems.beemo.cloudsystem.master.configuration.DefaultCloudConfiguration
 import systems.beemo.cloudsystem.master.configuration.DefaultFolderCreator
+import systems.beemo.cloudsystem.master.configuration.WebKeyCreator
 import systems.beemo.cloudsystem.master.configuration.WorkerKeyCreator
 import systems.beemo.cloudsystem.master.configuration.models.MasterConfig
 import systems.beemo.cloudsystem.master.network.NetworkServerImpl
 import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerRequestConnection
 import systems.beemo.cloudsystem.master.network.protocol.outgoing.PacketOutWorkerConnectionEstablished
 import systems.beemo.cloudsystem.master.network.utils.NetworkUtils
+import systems.beemo.cloudsystem.master.network.web.CloudWebServerImpl
+import systems.beemo.cloudsystem.master.network.web.router.Router
+import systems.beemo.cloudsystem.master.network.web.router.routes.MasterStatusRoute
 import systems.beemo.cloudsystem.master.worker.WorkerRegistry
 import kotlin.system.exitProcess
 
@@ -30,6 +34,7 @@ class CloudSystemMaster {
         lateinit var KODEIN: DI
         lateinit var MASTER_CONFIG: MasterConfig
         lateinit var SECRET_KEY: String
+        lateinit var WEB_KEY: String
     }
 
     fun start(args: Array<String>) {
@@ -38,9 +43,12 @@ class CloudSystemMaster {
 
         this.executeConfigurations()
         this.startNetworkServer()
+        this.startWebServer()
     }
 
     fun shutdownGracefully() {
+        this.shutdownNetworkServer()
+        this.shutdownWebServer()
         this.shutdownThreads()
 
         logger.info("Thank you for your trust in us. See ya next time!")
@@ -61,6 +69,7 @@ class CloudSystemMaster {
                 configurationLoader.registerConfiguration(DefaultFolderCreator())
                 configurationLoader.registerConfiguration(DefaultCloudConfiguration())
                 configurationLoader.registerConfiguration(WorkerKeyCreator())
+                configurationLoader.registerConfiguration(WebKeyCreator())
 
                 configurationLoader
             }
@@ -75,7 +84,16 @@ class CloudSystemMaster {
                 packetRegistry
             }
 
+            bind<Router>() with singleton {
+                val router = Router()
+
+                router.registerRoute("/status", MasterStatusRoute())
+
+                router
+            }
+
             bind<NetworkServerImpl>() with singleton { NetworkServerImpl(instance(), instance()) }
+            bind<CloudWebServerImpl>() with singleton { CloudWebServerImpl(instance()) }
         }
     }
 
@@ -94,14 +112,22 @@ class CloudSystemMaster {
 
     private fun startNetworkServer() {
         val networkServer: NetworkServerImpl by KODEIN.instance()
+        networkServer.startServer(MASTER_CONFIG.cloudServerPort)
+    }
 
-        networkServer.startServer(MASTER_CONFIG.cloudServerPort) {
-            if (it) logger.info("Network Server started and was bound to 127.0.0.1:${MASTER_CONFIG.cloudServerPort}")
-            else {
-                logger.error("Something went wrong while starting the server")
-                exitProcess(0)
-            }
-        }
+    private fun startWebServer() {
+        val cloudWebServer: CloudWebServerImpl by KODEIN.instance()
+        cloudWebServer.startServer(MASTER_CONFIG.webServerPort)
+    }
+
+    private fun shutdownWebServer() {
+        val cloudWebServer: CloudWebServerImpl by KODEIN.instance()
+        cloudWebServer.shutdownGracefully()
+    }
+
+    private fun shutdownNetworkServer() {
+        val networkServer: NetworkServerImpl by KODEIN.instance()
+        networkServer.shutdownGracefully()
     }
 
     private fun shutdownThreads() {

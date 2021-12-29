@@ -71,10 +71,9 @@ class PacketInWorkerRequestConnection : Packet {
         }
 
         networkUtils.sendPacketAsync(
-            // TODO: Set right web key
             PacketOutWorkerConnectionEstablished(
                 message = "Connection to master established!",
-                webKey = "webKey",
+                webKey = CloudSystemMaster.WEB_KEY,
                 successful = true
             ), channelHandlerContext.channel()
         )
