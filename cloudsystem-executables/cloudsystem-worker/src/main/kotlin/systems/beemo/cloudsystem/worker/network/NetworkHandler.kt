@@ -27,6 +27,7 @@ class NetworkHandler : SimpleChannelInboundHandler<Packet>() {
                     name = CloudSystemWorker.WORKER_CONFIG.workerName,
                     delimiter = CloudSystemWorker.WORKER_CONFIG.delimiter,
                     suffix = CloudSystemWorker.WORKER_CONFIG.suffix,
+                    currentOnlineServers = 0,
                     memory = CloudSystemWorker.WORKER_CONFIG.memory,
                     currentMemoryConsumption = HardwareUtils.getMemoryUsage(),
                     currentCpuConsumption = HardwareUtils.getCpuUsage(),
@@ -34,6 +35,8 @@ class NetworkHandler : SimpleChannelInboundHandler<Packet>() {
                 )
             ), channelHandlerContext.channel()
         )
+
+        CloudSystemWorker.MASTER_CHANNEL = channelHandlerContext.channel()
     }
 
     @Throws(Exception::class)

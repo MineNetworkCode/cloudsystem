@@ -8,9 +8,10 @@ data class WorkerInfo(
     val name: String,
     val delimiter: String,
     val suffix: String,
+    var currentOnlineServers: Int,
     val memory: Long,
-    val currentMemoryConsumption: Long,
-    val currentCpuConsumption: Double,
+    var currentMemoryConsumption: Long,
+    var currentCpuConsumption: Double,
     val responsibleGroups: MutableList<String>,
     var channel: Channel? = null // Might be null because we don't need it in the packets but in the master
 ) {
@@ -21,6 +22,7 @@ data class WorkerInfo(
                 name = document.getStringValue("name"),
                 delimiter = document.getStringValue("delimiter"),
                 suffix = document.getStringValue("suffix"),
+                currentOnlineServers = document.getIntValue("currentOnlineServers"),
                 memory = document.getLongValue("memory"),
                 currentMemoryConsumption = document.getLongValue("currentMemoryConsumption"),
                 currentCpuConsumption = document.getDoubleValue("currentCpuConsumption"),
@@ -33,6 +35,7 @@ data class WorkerInfo(
                 .appendString("name", workerInfo.name)
                 .appendString("delimiter", workerInfo.delimiter)
                 .appendString("suffix", workerInfo.suffix)
+                .appendInt("currentOnlineServers", workerInfo.currentOnlineServers)
                 .appendLong("memory", workerInfo.memory)
                 .appendLong("currentMemoryConsumption", workerInfo.currentMemoryConsumption)
                 .appendDouble("currentCpuConsumption", workerInfo.currentCpuConsumption)
