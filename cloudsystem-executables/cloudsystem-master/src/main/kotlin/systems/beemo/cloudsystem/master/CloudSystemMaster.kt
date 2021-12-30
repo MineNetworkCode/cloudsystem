@@ -20,6 +20,7 @@ import systems.beemo.cloudsystem.master.configuration.WorkerKeyCreator
 import systems.beemo.cloudsystem.master.configuration.models.MasterConfig
 import systems.beemo.cloudsystem.master.network.NetworkServerImpl
 import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerRequestConnection
+import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerUpdateLoadStatus
 import systems.beemo.cloudsystem.master.network.protocol.outgoing.PacketOutWorkerConnectionEstablished
 import systems.beemo.cloudsystem.master.network.utils.NetworkUtils
 import systems.beemo.cloudsystem.master.network.web.CloudWebServerImpl
@@ -91,6 +92,7 @@ class CloudSystemMaster {
                 val packetRegistry = PacketRegistry()
 
                 packetRegistry.registerIncomingPacket(PacketId.PACKET_REQUEST_CONNECTION, PacketInWorkerRequestConnection::class.java)
+                packetRegistry.registerIncomingPacket(PacketId.PACKET_UPDATE_LOAD_STATUS, PacketInWorkerUpdateLoadStatus::class.java)
                 packetRegistry.registerOutgoingPacket(PacketId.PACKET_ESTABLISHED_CONNECTION, PacketOutWorkerConnectionEstablished::class.java)
 
                 packetRegistry

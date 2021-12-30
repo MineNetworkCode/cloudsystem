@@ -36,7 +36,7 @@ class MasterStatusRoute : Route {
             val document = Document().appendString("workerName", "${it.name}${it.delimiter}${it.suffix}")
                 .appendLong("memory", it.memory)
                 .appendLong("currentMemoryConsumption", it.currentMemoryConsumption / 1024 / 1024)
-                .appendDouble("currentCpuConsumption", it.currentCpuConsumption)
+                .appendDouble("currentCpuConsumption", RoundUtils.roundDouble(it.currentCpuConsumption, 2))
 
             workerInfo.add(document.getAsJsonObject())
         }

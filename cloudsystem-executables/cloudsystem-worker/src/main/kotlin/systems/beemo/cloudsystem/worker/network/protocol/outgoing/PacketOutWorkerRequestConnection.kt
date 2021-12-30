@@ -12,7 +12,7 @@ class PacketOutWorkerRequestConnection(
     constructor() : this(
         "empty",
         WorkerInfo(
-            "empty", "empty", "empty", "empty", -1L,
+            "empty", "empty", "empty", "empty", 0, -1L,
             -1L, -1.0, mutableListOf()
         )
     )

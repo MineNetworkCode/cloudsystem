@@ -1,5 +1,6 @@
 package systems.beemo.cloudsystem.worker
 
+import io.netty.channel.Channel
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -20,7 +21,11 @@ import systems.beemo.cloudsystem.worker.configuration.models.WorkerConfig
 import systems.beemo.cloudsystem.worker.network.NetworkClientImpl
 import systems.beemo.cloudsystem.worker.network.protocol.incoming.PacketInWorkerConnectionEstablished
 import systems.beemo.cloudsystem.worker.network.protocol.outgoing.PacketOutWorkerRequestConnection
+import systems.beemo.cloudsystem.worker.network.protocol.outgoing.PacketOutWorkerUpdateLoadStatus
 import systems.beemo.cloudsystem.worker.network.utils.NetworkUtils
+import systems.beemo.cloudsystem.worker.tasks.UpdateLoadInfoTask
+import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.system.exitProcess
 
 class CloudSystemWorker {
@@ -28,8 +33,11 @@ class CloudSystemWorker {
     private val logger: Logger = LoggerFactory.getLogger(CloudSystemWorker::class.java)
 
     companion object {
+        lateinit var MASTER_CHANNEL: Channel
         lateinit var KODEIN: DI
+
         lateinit var WORKER_CONFIG: WorkerConfig
+
         lateinit var SECRET_KEY: String
         lateinit var WEB_KEY: String
     }
@@ -41,6 +49,8 @@ class CloudSystemWorker {
         this.executeConfigurations()
         this.startCommandRunner()
         this.startNetworkClient()
+
+        this.startTasks()
     }
 
     fun shutdownGracefully() {
@@ -82,6 +92,7 @@ class CloudSystemWorker {
                 val packetRegistry = PacketRegistry()
 
                 packetRegistry.registerOutgoingPacket(PacketId.PACKET_REQUEST_CONNECTION, PacketOutWorkerRequestConnection::class.java)
+                packetRegistry.registerOutgoingPacket(PacketId.PACKET_UPDATE_LOAD_STATUS, PacketOutWorkerUpdateLoadStatus::class.java)
                 packetRegistry.registerIncomingPacket(PacketId.PACKET_ESTABLISHED_CONNECTION, PacketInWorkerConnectionEstablished::class.java)
 
                 packetRegistry
@@ -112,6 +123,11 @@ class CloudSystemWorker {
     private fun startNetworkClient() {
         val networkClient: NetworkClientImpl by KODEIN.instance()
         networkClient.startClient(WORKER_CONFIG.cloudServerAddress, WORKER_CONFIG.cloudServerPort)
+    }
+
+    private fun startTasks() {
+        val timer = Timer("cloudsystem-timer")
+        timer.scheduleAtFixedRate(UpdateLoadInfoTask(), TimeUnit.SECONDS.toMillis(5), TimeUnit.SECONDS.toMillis(5))
     }
 
     private fun shutdownCommandRunner() {
