@@ -9,6 +9,8 @@ import java.util.*
 
 class WebKeyCreator : Configuration {
 
+    // TODO: Rework
+
     override fun execute() {
         val webKeyFile = File("${DirectoryConstants.MASTER_SECURE}/web.key")
 

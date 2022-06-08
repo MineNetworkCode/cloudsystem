@@ -11,6 +11,8 @@ import java.io.File
 
 class DefaultCloudConfiguration : Configuration {
 
+    // TODO: Rework
+
     private val logger: Logger = LoggerFactory.getLogger(DefaultCloudConfiguration::class.java)
 
     override fun execute() {
@@ -58,12 +60,6 @@ class DefaultCloudConfiguration : Configuration {
             useAuth = false
         )
 
-        val faunaDbConfig = FaunaDbConfig(
-            databaseHost = "localhost",
-            databaseName = "cloudsystem",
-            secretKey = "omegaSecretKey"
-        )
-
-        return DatabaseConfig(mongoDbConfig, faunaDbConfig)
+        return DatabaseConfig(mongoDbConfig)
     }
 }

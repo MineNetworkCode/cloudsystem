@@ -44,7 +44,6 @@ data class MasterConfig(
 
         private fun createDatabaseConfig(masterConfig: MasterConfig): Document {
             val mongoDbConfig = masterConfig.databases.mongoDbConfig
-            val faunaConfig = masterConfig.databases.faunaDbConfig
 
             val mongoConfig = Document().appendString("databaseHost", mongoDbConfig.databaseHost)
                 .appendString("databaseName", mongoDbConfig.databaseName)
@@ -54,11 +53,7 @@ data class MasterConfig(
                 .appendString("password", mongoDbConfig.password)
                 .appendBoolean("useAuth", mongoDbConfig.useAuth)
 
-            val faunaDbConfig = Document().appendString("databaseHost", faunaConfig.databaseHost)
-                .appendString("databaseName", faunaConfig.databaseName)
-                .appendString("secretKey", faunaConfig.secretKey)
-
-            return Document().appendDocument("mongodb", mongoConfig).appendDocument("faunadb", faunaDbConfig)
+            return Document().appendDocument("mongodb", mongoConfig)
         }
 
         fun fromDocument(document: Document): MasterConfig {
@@ -87,8 +82,7 @@ data class MasterConfig(
 
         private fun processDatabases(document: Document): DatabaseConfig {
             return DatabaseConfig(
-                mongoDbConfig = processMongoDbDatabase(Document(document.getJsonElementValue("mongodb").asJsonObject)),
-                faunaDbConfig = processFaunaDbDatabase(Document(document.getJsonElementValue("faunadb").asJsonObject))
+                mongoDbConfig = processMongoDbDatabase(Document(document.getJsonElementValue("mongodb").asJsonObject))
             )
         }
 
@@ -101,14 +95,6 @@ data class MasterConfig(
                 username = document.getStringValue("username"),
                 password = document.getStringValue("password"),
                 useAuth = document.getBooleanValue("useAuth")
-            )
-        }
-
-        private fun processFaunaDbDatabase(document: Document): FaunaDbConfig {
-            return FaunaDbConfig(
-                databaseHost = document.getStringValue("databaseHost"),
-                databaseName = document.getStringValue("databaseName"),
-                secretKey = document.getStringValue("secretKey")
             )
         }
     }

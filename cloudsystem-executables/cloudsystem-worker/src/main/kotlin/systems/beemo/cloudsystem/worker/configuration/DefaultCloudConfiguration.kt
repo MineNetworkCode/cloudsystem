@@ -13,6 +13,8 @@ import java.util.*
 
 class DefaultCloudConfiguration : Configuration {
 
+    // TODO: Rework
+
     private val logger: Logger = LoggerFactory.getLogger(DefaultCloudConfiguration::class.java)
 
     override fun execute() {

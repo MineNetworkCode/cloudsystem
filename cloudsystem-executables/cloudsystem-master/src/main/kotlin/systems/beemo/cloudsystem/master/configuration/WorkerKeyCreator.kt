@@ -11,6 +11,8 @@ import java.util.*
 
 class WorkerKeyCreator : Configuration {
 
+    // TODO: Rework
+
     private val logger: Logger = LoggerFactory.getLogger(WorkerKeyCreator::class.java)
 
     override fun execute() {
