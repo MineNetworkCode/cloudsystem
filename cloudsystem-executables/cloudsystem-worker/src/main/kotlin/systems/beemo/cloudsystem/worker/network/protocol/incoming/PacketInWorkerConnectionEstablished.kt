@@ -14,6 +14,7 @@ class PacketInWorkerConnectionEstablished : Packet {
 
     private lateinit var message: String
     private lateinit var webKey: String
+
     private var successful by Delegates.notNull<Boolean>()
 
     override fun read(document: Document) {

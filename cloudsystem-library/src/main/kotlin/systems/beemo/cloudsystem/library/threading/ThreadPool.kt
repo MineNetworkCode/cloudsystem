@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 
 class ThreadPool {
 
-    val internalPool: ThreadPoolExecutor = Executors.newFixedThreadPool(15, InternalThreadFactory("cloudsystem")) as ThreadPoolExecutor
+    val internalPool: ThreadPoolExecutor = Executors.newFixedThreadPool(16, InternalThreadFactory("cloudsystem")) as ThreadPoolExecutor
 
     fun shutdownPool() {
         internalPool.shutdown()

@@ -1,4 +1,4 @@
-package systems.beemo.cloudsystem.master.network.protocol.outgoing
+package systems.beemo.cloudsystem.master.network.protocol.outgoing.worker
 
 import systems.beemo.cloudsystem.library.document.Document
 import systems.beemo.cloudsystem.library.network.protocol.Packet

@@ -44,7 +44,7 @@ data class MasterConfig(
 
         private fun createDatabaseConfig(masterConfig: MasterConfig): Document {
             val mongoDbConfig = masterConfig.databases.mongoDbConfig
-            val mySqlConfig = masterConfig.databases.mySqlConfig
+            val faunaConfig = masterConfig.databases.faunaDbConfig
 
             val mongoConfig = Document().appendString("databaseHost", mongoDbConfig.databaseHost)
                 .appendString("databaseName", mongoDbConfig.databaseName)
@@ -54,14 +54,11 @@ data class MasterConfig(
                 .appendString("password", mongoDbConfig.password)
                 .appendBoolean("useAuth", mongoDbConfig.useAuth)
 
-            val mysqlConfig = Document().appendString("databaseHost", mySqlConfig.databaseHost)
-                .appendString("databaseName", mySqlConfig.databaseName)
-                .appendString("playerTableName", mySqlConfig.playerTableName)
-                .appendInt("port", mySqlConfig.port)
-                .appendString("username", mySqlConfig.username)
-                .appendString("password", mySqlConfig.password)
+            val faunaDbConfig = Document().appendString("databaseHost", faunaConfig.databaseHost)
+                .appendString("databaseName", faunaConfig.databaseName)
+                .appendString("secretKey", faunaConfig.secretKey)
 
-            return Document().appendDocument("mongodb", mongoConfig).appendDocument("mysql", mysqlConfig)
+            return Document().appendDocument("mongodb", mongoConfig).appendDocument("faunadb", faunaDbConfig)
         }
 
         fun fromDocument(document: Document): MasterConfig {
@@ -91,7 +88,7 @@ data class MasterConfig(
         private fun processDatabases(document: Document): DatabaseConfig {
             return DatabaseConfig(
                 mongoDbConfig = processMongoDbDatabase(Document(document.getJsonElementValue("mongodb").asJsonObject)),
-                mySqlConfig = processMySqlDatabase(Document(document.getJsonElementValue("mysql").asJsonObject))
+                faunaDbConfig = processFaunaDbDatabase(Document(document.getJsonElementValue("faunadb").asJsonObject))
             )
         }
 
@@ -107,14 +104,11 @@ data class MasterConfig(
             )
         }
 
-        private fun processMySqlDatabase(document: Document): MySqlConfig {
-            return MySqlConfig(
+        private fun processFaunaDbDatabase(document: Document): FaunaDbConfig {
+            return FaunaDbConfig(
                 databaseHost = document.getStringValue("databaseHost"),
                 databaseName = document.getStringValue("databaseName"),
-                playerTableName = document.getStringValue("playerTableName"),
-                port = document.getIntValue("port"),
-                username = document.getStringValue("username"),
-                password = document.getStringValue("password")
+                secretKey = document.getStringValue("secretKey")
             )
         }
     }

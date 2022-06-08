@@ -29,7 +29,7 @@ class DefaultCloudConfiguration : Configuration {
                 suffix = "01",
                 memory = workerDefaultMemory,
                 workerUuid = UUID.randomUUID().toString().replace("-", ""),
-                responsibleGroups = mutableListOf()
+                responsibleGroups = mutableListOf("Bungee", "Lobby")
             )
 
             WorkerConfig.toDocument(workerConfig).write(cloudConfigFile)

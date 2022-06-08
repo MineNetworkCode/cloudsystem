@@ -9,8 +9,9 @@ import systems.beemo.cloudsystem.library.document.Document
 import systems.beemo.cloudsystem.library.dto.WorkerInfo
 import systems.beemo.cloudsystem.library.network.protocol.Packet
 import systems.beemo.cloudsystem.master.CloudSystemMaster
-import systems.beemo.cloudsystem.master.network.protocol.outgoing.PacketOutWorkerConnectionEstablished
+import systems.beemo.cloudsystem.master.network.protocol.outgoing.worker.PacketOutWorkerConnectionEstablished
 import systems.beemo.cloudsystem.master.network.utils.NetworkUtils
+import systems.beemo.cloudsystem.master.process.ProcessRequestHandler
 import systems.beemo.cloudsystem.master.worker.WorkerRegistry
 import kotlin.properties.Delegates
 
@@ -20,6 +21,7 @@ class PacketInWorkerRequestConnection : Packet {
 
     private val networkUtils: NetworkUtils by CloudSystemMaster.KODEIN.instance()
     private val workerRegistry: WorkerRegistry by CloudSystemMaster.KODEIN.instance()
+    private val processRequestHandler: ProcessRequestHandler by CloudSystemMaster.KODEIN.instance()
 
     private lateinit var workerInfo: WorkerInfo
 
@@ -83,7 +85,7 @@ class PacketInWorkerRequestConnection : Packet {
             })"
         )
 
-        // TODO: Request processes
+        processRequestHandler.requestProcessesOnConnect(workerInfo)
     }
 
     private fun isWorkerAuthenticated(channel: Channel, workerName: String): Boolean {

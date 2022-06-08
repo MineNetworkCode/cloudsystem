@@ -41,5 +41,6 @@ class NetworkHandler : SimpleChannelInboundHandler<Packet>() {
 
     @Throws(Exception::class)
     override fun exceptionCaught(channelHandlerContext: ChannelHandlerContext, cause: Throwable) {
+        // TODO: Exception Handler
     }
 }

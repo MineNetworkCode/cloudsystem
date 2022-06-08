@@ -15,20 +15,20 @@ class DefaultFolderCreator : Configuration {
         Path.of(DirectoryConstants.MASTER_CONFIG),
         Path.of(DirectoryConstants.MASTER_CONFIG_CLOUD),
         Path.of(DirectoryConstants.MASTER_CONFIG_GROUPS),
-        Path.of(DirectoryConstants.MASTER_CONFIG_GROUPS_PROXY),
-        Path.of(DirectoryConstants.MASTER_CONFIG_GROUPS_SERVER),
+        Path.of(DirectoryConstants.MASTER_CONFIG_GROUPS_BUNGEE),
+        Path.of(DirectoryConstants.MASTER_CONFIG_GROUPS_SPIGOT),
         Path.of(DirectoryConstants.MASTER_CONFIG_PERMISSIONS),
         Path.of(DirectoryConstants.MASTER_ADDONS),
         Path.of(DirectoryConstants.MASTER_TEMPLATE),
-        Path.of(DirectoryConstants.MASTER_TEMPLATE_PROXY),
-        Path.of(DirectoryConstants.MASTER_TEMPLATE_SERVER),
+        Path.of(DirectoryConstants.MASTER_TEMPLATE_BUNGEE),
+        Path.of(DirectoryConstants.MASTER_TEMPLATE_SPIGOT),
         Path.of(DirectoryConstants.MASTER_WEB),
         Path.of(DirectoryConstants.MASTER_GLOBAL),
-        Path.of(DirectoryConstants.MASTER_GLOBAL_PROXY),
-        Path.of(DirectoryConstants.MASTER_GLOBAL_SERVER),
+        Path.of(DirectoryConstants.MASTER_GLOBAL_BUNGEE),
+        Path.of(DirectoryConstants.MASTER_GLOBAL_SPIGOT),
         Path.of(DirectoryConstants.MASTER_LOCAL),
-        Path.of(DirectoryConstants.MASTER_LOCAL_SERVER),
-        Path.of(DirectoryConstants.MASTER_LOCAL_PROXY)
+        Path.of(DirectoryConstants.MASTER_LOCAL_SPIGOT),
+        Path.of(DirectoryConstants.MASTER_LOCAL_BUNGEE)
     )
 
     override fun execute() {

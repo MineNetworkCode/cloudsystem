@@ -58,15 +58,12 @@ class DefaultCloudConfiguration : Configuration {
             useAuth = false
         )
 
-        val mySqlConfig = MySqlConfig(
+        val faunaDbConfig = FaunaDbConfig(
             databaseHost = "localhost",
             databaseName = "cloudsystem",
-            playerTableName = "playerTable",
-            port = 3306,
-            username = "<change me>",
-            password = "<change me>"
+            secretKey = "omegaSecretKey"
         )
 
-        return DatabaseConfig(mongoDbConfig, mySqlConfig)
+        return DatabaseConfig(mongoDbConfig, faunaDbConfig)
     }
 }

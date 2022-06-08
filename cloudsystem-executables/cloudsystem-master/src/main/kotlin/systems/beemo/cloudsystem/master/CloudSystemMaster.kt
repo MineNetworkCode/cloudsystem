@@ -13,19 +13,21 @@ import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
 import systems.beemo.cloudsystem.master.commands.HelpCommand
-import systems.beemo.cloudsystem.master.configuration.DefaultCloudConfiguration
-import systems.beemo.cloudsystem.master.configuration.DefaultFolderCreator
-import systems.beemo.cloudsystem.master.configuration.WebKeyCreator
-import systems.beemo.cloudsystem.master.configuration.WorkerKeyCreator
+import systems.beemo.cloudsystem.master.configuration.*
 import systems.beemo.cloudsystem.master.configuration.models.MasterConfig
+import systems.beemo.cloudsystem.master.groups.bungee.BungeeGroupHandler
+import systems.beemo.cloudsystem.master.groups.spigot.SpigotGroupHandler
 import systems.beemo.cloudsystem.master.network.NetworkServerImpl
 import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerRequestConnection
 import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerUpdateLoadStatus
-import systems.beemo.cloudsystem.master.network.protocol.outgoing.PacketOutWorkerConnectionEstablished
+import systems.beemo.cloudsystem.master.network.protocol.outgoing.process.PacketOutRequestProcess
+import systems.beemo.cloudsystem.master.network.protocol.outgoing.worker.PacketOutWorkerConnectionEstablished
 import systems.beemo.cloudsystem.master.network.utils.NetworkUtils
 import systems.beemo.cloudsystem.master.network.web.CloudWebServerImpl
 import systems.beemo.cloudsystem.master.network.web.router.Router
 import systems.beemo.cloudsystem.master.network.web.router.routes.MasterStatusRoute
+import systems.beemo.cloudsystem.master.process.ProcessRegistry
+import systems.beemo.cloudsystem.master.process.ProcessRequestHandler
 import systems.beemo.cloudsystem.master.worker.WorkerRegistry
 import kotlin.system.exitProcess
 
@@ -68,13 +70,20 @@ class CloudSystemMaster {
             bind<NettyHelper>() with singleton { NettyHelper() }
             bind<NetworkUtils>() with singleton { NetworkUtils() }
 
+            bind<SpigotGroupHandler>() with singleton { SpigotGroupHandler() }
+            bind<BungeeGroupHandler>() with singleton { BungeeGroupHandler() }
+
             bind<ConfigurationLoader>() with singleton {
                 val configurationLoader = ConfigurationLoader()
 
                 configurationLoader.registerConfiguration(DefaultFolderCreator())
                 configurationLoader.registerConfiguration(DefaultCloudConfiguration())
+                configurationLoader.registerConfiguration(SpigotDownloadConfiguration())
+                configurationLoader.registerConfiguration(BungeeDownloadConfiguration())
                 configurationLoader.registerConfiguration(WorkerKeyCreator())
                 configurationLoader.registerConfiguration(WebKeyCreator())
+                configurationLoader.registerConfiguration(SpigotGroupLoader(instance()))
+                configurationLoader.registerConfiguration(BungeeGroupLoader(instance()))
 
                 configurationLoader
             }
@@ -94,9 +103,13 @@ class CloudSystemMaster {
                 packetRegistry.registerIncomingPacket(PacketId.PACKET_REQUEST_CONNECTION, PacketInWorkerRequestConnection::class.java)
                 packetRegistry.registerIncomingPacket(PacketId.PACKET_UPDATE_LOAD_STATUS, PacketInWorkerUpdateLoadStatus::class.java)
                 packetRegistry.registerOutgoingPacket(PacketId.PACKET_ESTABLISHED_CONNECTION, PacketOutWorkerConnectionEstablished::class.java)
+                packetRegistry.registerOutgoingPacket(PacketId.PACKET_REQUEST_PROCESS, PacketOutRequestProcess::class.java)
 
                 packetRegistry
             }
+
+            bind<ProcessRegistry>() with singleton { ProcessRegistry() }
+            bind<ProcessRequestHandler>() with singleton { ProcessRequestHandler(instance(), instance(), instance(), instance(), instance()) }
 
             bind<Router>() with singleton {
                 val router = Router()

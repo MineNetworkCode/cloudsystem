@@ -11,8 +11,8 @@ class DefaultFolderCreator : Configuration {
         Path.of(DirectoryConstants.WORKER),
         Path.of(DirectoryConstants.WORKER_CACHED),
         Path.of(DirectoryConstants.WORKER_CACHED_TEMPLATES),
-        Path.of(DirectoryConstants.WORKER_CACHED_TEMPLATES_PROXY),
-        Path.of(DirectoryConstants.WORKER_CACHED_TEMPLATES_SERVER),
+        Path.of(DirectoryConstants.WORKER_CACHED_TEMPLATES_BUNGEE),
+        Path.of(DirectoryConstants.WORKER_CACHED_TEMPLATES_SPIGOT),
         Path.of(DirectoryConstants.WORKER_SECURE),
         Path.of(DirectoryConstants.WORKER_CONFIG),
         Path.of(DirectoryConstants.WORKER_RUNNING)

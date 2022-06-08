@@ -1,12 +1,13 @@
 package systems.beemo.cloudsystem.master.worker
 
 import io.netty.channel.Channel
+import systems.beemo.cloudsystem.library.cache.Cache
 import systems.beemo.cloudsystem.library.dto.WorkerInfo
 import java.util.stream.Collectors
 
 class WorkerRegistry {
 
-    private val workers: MutableMap<String, WorkerInfo> = mutableMapOf()
+    private val workers: Cache<String, WorkerInfo> = Cache()
 
     fun registerWorker(workerInfo: WorkerInfo): Boolean {
         if (this.workers.containsKey(workerInfo.uuid)) return false
@@ -42,7 +43,7 @@ class WorkerRegistry {
     }
 
     fun getWorkers(): MutableList<WorkerInfo> {
-        return this.workers.values.stream().collect(Collectors.toList())
+        return this.workers.getCacheValues()
     }
 
     fun getLeastUsedWorker(group: String): WorkerInfo? {
