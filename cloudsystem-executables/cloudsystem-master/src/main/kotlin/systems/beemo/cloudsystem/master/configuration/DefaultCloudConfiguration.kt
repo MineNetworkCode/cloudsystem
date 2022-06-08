@@ -6,12 +6,13 @@ import systems.beemo.cloudsystem.library.configuration.Configuration
 import systems.beemo.cloudsystem.library.document.Document
 import systems.beemo.cloudsystem.library.utils.DirectoryConstants
 import systems.beemo.cloudsystem.master.CloudSystemMaster
-import systems.beemo.cloudsystem.master.configuration.models.*
+import systems.beemo.cloudsystem.master.configuration.models.DatabaseConfig
+import systems.beemo.cloudsystem.master.configuration.models.MasterConfig
+import systems.beemo.cloudsystem.master.configuration.models.MongoDbConfig
+import systems.beemo.cloudsystem.master.configuration.models.ValidWorkerConfig
 import java.io.File
 
 class DefaultCloudConfiguration : Configuration {
-
-    // TODO: Rework
 
     private val logger: Logger = LoggerFactory.getLogger(DefaultCloudConfiguration::class.java)
 
@@ -32,11 +33,11 @@ class DefaultCloudConfiguration : Configuration {
             )
 
             MasterConfig.toDocument(masterConfig).write(cloudConfigFile)
-            CloudSystemMaster.MASTER_CONFIG = masterConfig
+            CloudSystemMaster.RUNTIME_VARS.masterConfig = masterConfig
 
             logger.warn("It seems the cloud config was just created. Please edit it depending on your wishes!")
         } else {
-            CloudSystemMaster.MASTER_CONFIG = MasterConfig.fromDocument(Document.read(cloudConfigFile))
+            CloudSystemMaster.RUNTIME_VARS.masterConfig = MasterConfig.fromDocument(Document.read(cloudConfigFile))
         }
     }
 
