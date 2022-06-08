@@ -20,7 +20,7 @@
     <name>cloudsystem-api</name>
 
     <properties>
-        <shade.plugin.version>3.3.0-SNAPSHOT</shade.plugin.version>
+        <shade.plugin.version>3.3.0</shade.plugin.version>
         <jvm.target.version>1.8</jvm.target.version>
     </properties>
 
