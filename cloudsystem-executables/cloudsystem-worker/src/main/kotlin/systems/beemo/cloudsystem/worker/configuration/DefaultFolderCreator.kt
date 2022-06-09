@@ -5,7 +5,7 @@ import systems.beemo.cloudsystem.library.utils.DirectoryConstants
 import systems.beemo.cloudsystem.library.utils.FileUtils
 import java.nio.file.Path
 
-class DefaultFolderCreator : Configuration {
+class DefaultFolderCreator : Configuration() {
 
     private val requiredFolders: MutableList<Path> = mutableListOf(
         Path.of(DirectoryConstants.WORKER),

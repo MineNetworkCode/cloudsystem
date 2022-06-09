@@ -1,6 +1,11 @@
 package systems.beemo.cloudsystem.library.configuration
 
-interface Configuration {
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
-    fun execute()
+abstract class Configuration {
+
+    val bufferedReader: BufferedReader = BufferedReader(InputStreamReader(System.`in`))
+
+    abstract fun execute()
 }

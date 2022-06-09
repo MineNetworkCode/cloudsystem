@@ -9,7 +9,7 @@ import systems.beemo.cloudsystem.master.CloudSystemMaster
 import java.io.File
 import java.util.*
 
-class KeysCreator : Configuration {
+class KeysCreator : Configuration() {
 
     private val logger: Logger = LoggerFactory.getLogger(KeysCreator::class.java)
 

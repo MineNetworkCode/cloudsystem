@@ -11,6 +11,7 @@ import systems.beemo.cloudsystem.library.configuration.ConfigurationLoader
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
+import systems.beemo.cloudsystem.library.utils.StringUtils
 import systems.beemo.cloudsystem.master.commands.HelpCommand
 import systems.beemo.cloudsystem.master.configuration.*
 import systems.beemo.cloudsystem.master.groups.bungee.BungeeGroupHandler
@@ -33,6 +34,8 @@ class CloudSystemMaster {
     }
 
     fun start(args: Array<String>) {
+        StringUtils.printHeader("Master")
+
         this.prepareDI()
         this.checkForRoot(args)
 
@@ -123,7 +126,7 @@ class CloudSystemMaster {
 
     private fun startNetworkServer() {
         val networkServer: NetworkServerImpl by KODEIN.instance()
-        networkServer.startServer(RUNTIME_VARS.masterConfig.cloudServerPort)
+        networkServer.startServer(RUNTIME_VARS.masterConfig.masterPort)
     }
 
     private fun startWebServer() {

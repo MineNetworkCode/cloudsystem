@@ -11,7 +11,7 @@ import systems.beemo.cloudsystem.worker.configuration.models.WorkerConfig
 import java.io.File
 import java.util.*
 
-class DefaultCloudConfiguration : Configuration {
+class DefaultCloudConfiguration : Configuration() {
 
     // TODO: Rework
 
@@ -24,8 +24,8 @@ class DefaultCloudConfiguration : Configuration {
             val workerDefaultMemory = (HardwareUtils.getSystemMemory() / 3) / 1024 / 1024
 
             val workerConfig = WorkerConfig(
-                cloudServerAddress = "127.0.0.1",
-                cloudServerPort = 8000,
+                masterAddress = "127.0.0.1",
+                masterPort = 8000,
                 workerName = "Worker",
                 delimiter = "-",
                 suffix = "01",

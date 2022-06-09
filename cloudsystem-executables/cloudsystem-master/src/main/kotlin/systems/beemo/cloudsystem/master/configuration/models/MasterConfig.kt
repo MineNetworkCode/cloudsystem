@@ -5,12 +5,8 @@ import com.google.gson.JsonElement
 import systems.beemo.cloudsystem.library.document.Document
 
 data class MasterConfig(
-    val cloudServerPort: Int,
+    val masterPort: Int,
     val webServerPort: Int,
-    val masterName: String,
-    val spigotName: String,
-    val spigotVersion: String,
-    val bungeeName: String,
     val databaseBackend: String,
     val validWorkers: MutableList<ValidWorkerConfig>,
     val databases: DatabaseConfig
@@ -18,12 +14,8 @@ data class MasterConfig(
 
     companion object {
         fun toDocument(masterConfig: MasterConfig): Document {
-            return Document().appendInt("cloudServerPort", masterConfig.cloudServerPort)
+            return Document().appendInt("masterPort", masterConfig.masterPort)
                 .appendInt("webServerPort", masterConfig.webServerPort)
-                .appendString("masterName", masterConfig.masterName)
-                .appendString("spigotName", masterConfig.spigotName)
-                .appendString("spigotVersion", masterConfig.spigotVersion)
-                .appendString("bungeeName", masterConfig.bungeeName)
                 .appendString("databaseBackend", masterConfig.databaseBackend)
                 .appendJsonElement("validWorkers", createValidWorkerConfig(masterConfig))
                 .appendDocument("databases", createDatabaseConfig(masterConfig))
@@ -58,12 +50,8 @@ data class MasterConfig(
 
         fun fromDocument(document: Document): MasterConfig {
             return MasterConfig(
-                cloudServerPort = document.getIntValue("cloudServerPort"),
+                masterPort = document.getIntValue("masterPort"),
                 webServerPort = document.getIntValue("webServerPort"),
-                masterName = document.getStringValue("masterName"),
-                spigotName = document.getStringValue("spigotName"),
-                spigotVersion = document.getStringValue("spigotVersion"),
-                bungeeName = document.getStringValue("bungeeName"),
                 databaseBackend = document.getStringValue("databaseBackend"),
                 validWorkers = processValidWorkers(document.getJsonElementValue("validWorkers").asJsonArray),
                 databases = processDatabases(document.getDocument("databases"))

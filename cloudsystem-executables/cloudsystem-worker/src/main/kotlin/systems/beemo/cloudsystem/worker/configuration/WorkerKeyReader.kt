@@ -9,7 +9,7 @@ import systems.beemo.cloudsystem.worker.CloudSystemWorker
 import java.io.File
 import kotlin.system.exitProcess
 
-class WorkerKeyReader : Configuration {
+class WorkerKeyReader : Configuration() {
 
     // TODO: Rework
 

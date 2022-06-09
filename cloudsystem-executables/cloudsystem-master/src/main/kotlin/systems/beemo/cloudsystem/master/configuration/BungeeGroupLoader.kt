@@ -11,7 +11,7 @@ import java.io.File
 
 class BungeeGroupLoader(
     private val bungeeGroupHandler: BungeeGroupHandler
-) : Configuration {
+) : Configuration() {
 
     private val logger: Logger = LoggerFactory.getLogger(BungeeGroupLoader::class.java)
 
