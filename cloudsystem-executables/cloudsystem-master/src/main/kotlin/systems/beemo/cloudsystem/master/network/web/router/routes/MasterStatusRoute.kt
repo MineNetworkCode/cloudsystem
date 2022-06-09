@@ -12,9 +12,11 @@ import systems.beemo.cloudsystem.library.utils.HardwareUtils
 import systems.beemo.cloudsystem.library.utils.RoundUtils
 import systems.beemo.cloudsystem.master.CloudSystemMaster
 import systems.beemo.cloudsystem.master.network.web.router.Route
+import systems.beemo.cloudsystem.master.worker.WorkerRegistry
 
 class MasterStatusRoute : Route {
 
+    private val workerRegistry: WorkerRegistry by CloudSystemMaster.KODEIN.instance()
     private val threadPool: ThreadPool by CloudSystemMaster.KODEIN.instance()
 
     override fun handle(channelHandlerContext: ChannelHandlerContext, fullHttpRequest: FullHttpRequest): HttpResponse {
@@ -29,8 +31,7 @@ class MasterStatusRoute : Route {
             .appendInt("runningExecutorServiceThreads", threadPool.internalPool.activeCount)
 
         val workerInfo = JsonArray()
-        /**
-         * TODO: Get to work again
+
         workerRegistry.getWorkers().forEach {
             val document = Document().appendString("workerName", "${it.name}${it.delimiter}${it.suffix}")
                 .appendLong("memory", it.memory)
@@ -39,7 +40,6 @@ class MasterStatusRoute : Route {
 
             workerInfo.add(document.getAsJsonObject())
         }
-        */
 
         val responseDocument = Document().appendString("version", "0.0.1")
             .appendDocument("statusInfo", statusInfo)

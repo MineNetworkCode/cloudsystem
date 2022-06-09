@@ -2,6 +2,7 @@ package systems.beemo.cloudsystem.master.groups.spigot
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import systems.beemo.cloudsystem.library.cache.Cache
 import systems.beemo.cloudsystem.library.utils.DirectoryConstants
 import systems.beemo.cloudsystem.library.utils.FileUtils
 import systems.beemo.cloudsystem.library.utils.ZipUtils
@@ -13,7 +14,7 @@ class SpigotGroupHandler {
 
     private val logger: Logger = LoggerFactory.getLogger(SpigotGroupHandler::class.java)
 
-    private val spigotGroups: MutableMap<String, SpigotGroup> = mutableMapOf()
+    private val spigotGroups: Cache<String, SpigotGroup> = Cache()
 
     fun registerGroup(spigotGroup: SpigotGroup) {
         if (spigotGroups.containsKey(spigotGroup.name)) return

@@ -8,7 +8,9 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import systems.beemo.cloudsystem.library.command.CommandManager
 import systems.beemo.cloudsystem.library.configuration.ConfigurationLoader
+import systems.beemo.cloudsystem.library.network.error.ErrorHandler
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
+import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
 import systems.beemo.cloudsystem.library.utils.StringUtils
@@ -17,10 +19,15 @@ import systems.beemo.cloudsystem.master.configuration.*
 import systems.beemo.cloudsystem.master.groups.bungee.BungeeGroupHandler
 import systems.beemo.cloudsystem.master.groups.spigot.SpigotGroupHandler
 import systems.beemo.cloudsystem.master.network.NetworkServerImpl
+import systems.beemo.cloudsystem.master.network.utils.NetworkUtils
 import systems.beemo.cloudsystem.master.network.web.WebServerImpl
 import systems.beemo.cloudsystem.master.network.web.router.Router
 import systems.beemo.cloudsystem.master.network.web.router.routes.MasterStatusRoute
 import systems.beemo.cloudsystem.master.runtime.RuntimeVars
+import systems.beemo.cloudsystem.master.worker.WorkerRegistry
+import systems.beemo.cloudsystem.master.worker.protocol.`in`.PacketInWorkerRequestConnection
+import systems.beemo.cloudsystem.master.worker.protocol.`in`.PacketInWorkerUpdateLoadStatus
+import systems.beemo.cloudsystem.master.worker.protocol.out.PacketOutWorkerConnectionEstablished
 import kotlin.system.exitProcess
 
 class CloudSystemMaster {
@@ -61,6 +68,7 @@ class CloudSystemMaster {
             bind<ThreadPool>() with singleton { ThreadPool() }
 
             bind<NettyHelper>() with singleton { NettyHelper() }
+            bind<NetworkUtils>() with singleton { NetworkUtils() }
 
             bind<SpigotGroupHandler>() with singleton { SpigotGroupHandler() }
             bind<BungeeGroupHandler>() with singleton { BungeeGroupHandler() }
@@ -87,11 +95,19 @@ class CloudSystemMaster {
                 commandManager
             }
 
+            bind<WorkerRegistry>() with singleton { WorkerRegistry() }
             bind<PacketRegistry>() with singleton {
                 val packetRegistry = PacketRegistry()
 
+                packetRegistry.registerIncomingPacket(PacketId.PACKET_REQUEST_CONNECTION, PacketInWorkerRequestConnection::class.java)
+                packetRegistry.registerIncomingPacket(PacketId.PACKET_UPDATE_LOAD_STATUS, PacketInWorkerUpdateLoadStatus::class.java)
+
+                packetRegistry.registerOutgoingPacket(PacketId.PACKET_ESTABLISHED_CONNECTION, PacketOutWorkerConnectionEstablished::class.java)
+
                 packetRegistry
             }
+
+            bind<ErrorHandler>() with singleton { ErrorHandler() }
 
             bind<Router>() with singleton {
                 val router = Router()

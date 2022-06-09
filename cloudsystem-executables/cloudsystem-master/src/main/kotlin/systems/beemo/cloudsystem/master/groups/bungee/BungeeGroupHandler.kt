@@ -2,6 +2,7 @@ package systems.beemo.cloudsystem.master.groups.bungee
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import systems.beemo.cloudsystem.library.cache.Cache
 import systems.beemo.cloudsystem.library.utils.DirectoryConstants
 import systems.beemo.cloudsystem.library.utils.FileUtils
 import systems.beemo.cloudsystem.library.utils.ZipUtils
@@ -13,7 +14,7 @@ class BungeeGroupHandler {
 
     private val logger: Logger = LoggerFactory.getLogger(BungeeGroupHandler::class.java)
 
-    private val bungeeGroups: MutableMap<String, BungeeGroup> = mutableMapOf()
+    private val bungeeGroups: Cache<String, BungeeGroup> = Cache()
 
     fun registerGroup(bungeeGroup: BungeeGroup) {
         if (bungeeGroups.containsKey(bungeeGroup.name)) return
