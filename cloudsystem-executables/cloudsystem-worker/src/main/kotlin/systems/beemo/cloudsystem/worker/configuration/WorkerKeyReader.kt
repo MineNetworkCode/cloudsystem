@@ -22,7 +22,7 @@ class WorkerKeyReader : Configuration() {
             logger.error("Can't find the worker key in \"${DirectoryConstants.WORKER_SECURE}\"! Did you copy it?")
             exitProcess(0)
         } else {
-            CloudSystemWorker.SECRET_KEY = FileUtils.readStringFromFile(workerKeyFile)
+            CloudSystemWorker.RUNTIME_VARS.secretKey = FileUtils.readStringFromFile(workerKeyFile)
         }
     }
 }

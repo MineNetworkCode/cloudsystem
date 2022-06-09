@@ -23,8 +23,6 @@ class BungeeDownloadConfiguration : Configuration() {
 
         val downloadLink = this.readBungeeVersion()
 
-        logger.info("Alright, starting to download your requested bungeecord version!")
-
         try {
             DownloadUtils.downloadFile(
                 downloadLink,

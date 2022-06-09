@@ -24,8 +24,6 @@ class SpigotDownloadConfiguration : Configuration() {
 
         val downloadLink = this.readSpigotVersion()
 
-        logger.info("Alright, starting to download your requested spigot version!")
-
         try {
             DownloadUtils.downloadFile(
                 downloadLink,

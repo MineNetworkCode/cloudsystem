@@ -1,6 +1,5 @@
 package systems.beemo.cloudsystem.worker
 
-import io.netty.channel.Channel
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -12,11 +11,12 @@ import systems.beemo.cloudsystem.library.configuration.ConfigurationLoader
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
+import systems.beemo.cloudsystem.library.utils.StringUtils
 import systems.beemo.cloudsystem.worker.commands.HelpCommand
 import systems.beemo.cloudsystem.worker.configuration.DefaultCloudConfiguration
 import systems.beemo.cloudsystem.worker.configuration.DefaultFolderCreator
 import systems.beemo.cloudsystem.worker.configuration.WorkerKeyReader
-import systems.beemo.cloudsystem.worker.configuration.models.WorkerConfig
+import systems.beemo.cloudsystem.worker.runtime.RuntimeVars
 import kotlin.system.exitProcess
 
 class CloudSystemWorker {
@@ -24,16 +24,14 @@ class CloudSystemWorker {
     private val logger: Logger = LoggerFactory.getLogger(CloudSystemWorker::class.java)
 
     companion object {
-        lateinit var MASTER_CHANNEL: Channel
         lateinit var KODEIN: DI
 
-        lateinit var WORKER_CONFIG: WorkerConfig
-
-        lateinit var SECRET_KEY: String
-        lateinit var WEB_KEY: String
+        val RUNTIME_VARS = RuntimeVars()
     }
 
     fun start(args: Array<String>) {
+        StringUtils.printHeader("Worker")
+
         this.prepareDI()
         this.checkForRoot(args)
 

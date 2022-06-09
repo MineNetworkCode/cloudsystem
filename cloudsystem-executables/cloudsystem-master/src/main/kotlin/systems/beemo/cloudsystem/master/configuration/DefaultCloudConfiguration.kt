@@ -22,7 +22,6 @@ class DefaultCloudConfiguration : Configuration() {
         "MONGO"
     )
 
-
     override fun execute() {
         val cloudConfigFile = File("${DirectoryConstants.MASTER_CONFIG_CLOUD}/config.json")
 
@@ -34,7 +33,7 @@ class DefaultCloudConfiguration : Configuration() {
             val masterConfig = MasterConfig(
                 masterPort = masterPort,
                 webServerPort = webServerPort,
-                databaseBackend = "FILE",
+                databaseBackend = databaseBackend,
                 validWorkers = this.createValidWorkerConfig(),
                 databases = this.createDatabaseConfig()
             )
@@ -51,6 +50,10 @@ class DefaultCloudConfiguration : Configuration() {
     private fun readPort(service: String, defaultPort: Int): Int {
         logger.info("Please pick a port for the $service to run on. Default: $defaultPort")
         val input = bufferedReader.readLine()
+
+        if (input.equals("")) {
+            return defaultPort
+        }
 
         try {
             val port = Integer.parseInt(input)
