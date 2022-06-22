@@ -9,11 +9,11 @@ import org.slf4j.LoggerFactory
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import kotlin.system.exitProcess
 
-abstract class NetworkServer(
+abstract class AbstractNetworkServer(
     private val nettyHelper: NettyHelper
 ) {
 
-    private val logger: Logger = LoggerFactory.getLogger(NetworkServer::class.java)
+    private val logger: Logger = LoggerFactory.getLogger(AbstractNetworkServer::class.java)
 
     private lateinit var bossGroup: EventLoopGroup
     private lateinit var workerGroup: EventLoopGroup

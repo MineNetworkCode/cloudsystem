@@ -11,8 +11,6 @@ import kotlin.system.exitProcess
 
 class WorkerKeyReader : Configuration() {
 
-    // TODO: Rework
-
     private val logger: Logger = LoggerFactory.getLogger(WorkerKeyReader::class.java)
 
     override fun execute() {

@@ -18,9 +18,9 @@ import systems.beemo.cloudsystem.master.commands.HelpCommand
 import systems.beemo.cloudsystem.master.configuration.*
 import systems.beemo.cloudsystem.master.groups.bungee.BungeeGroupHandler
 import systems.beemo.cloudsystem.master.groups.spigot.SpigotGroupHandler
-import systems.beemo.cloudsystem.master.network.NetworkServerImpl
+import systems.beemo.cloudsystem.master.network.NetworkServer
 import systems.beemo.cloudsystem.master.network.utils.NetworkUtils
-import systems.beemo.cloudsystem.master.network.web.WebServerImpl
+import systems.beemo.cloudsystem.master.network.web.WebServer
 import systems.beemo.cloudsystem.master.network.web.router.Router
 import systems.beemo.cloudsystem.master.network.web.router.routes.MasterStatusRoute
 import systems.beemo.cloudsystem.master.runtime.RuntimeVars
@@ -45,6 +45,7 @@ class CloudSystemMaster {
 
         this.prepareDI()
         this.checkForRoot(args)
+        this.checkForDebug(args)
 
         this.executeConfigurations()
         this.startCommandRunner()
@@ -117,8 +118,8 @@ class CloudSystemMaster {
                 router
             }
 
-            bind<NetworkServerImpl>() with singleton { NetworkServerImpl(instance(), instance()) }
-            bind<WebServerImpl>() with singleton { WebServerImpl(instance()) }
+            bind<NetworkServer>() with singleton { NetworkServer(instance(), instance()) }
+            bind<WebServer>() with singleton { WebServer(instance()) }
         }
     }
 
@@ -128,6 +129,10 @@ class CloudSystemMaster {
             logger.error("If you want to use it anyway, at your own risk, add \"--enable-root\" to the start arguments.")
             exitProcess(0)
         }
+    }
+
+    private fun checkForDebug(args: Array<String>) {
+        RUNTIME_VARS.debug = args.contains("--debug")
     }
 
     private fun executeConfigurations() {
@@ -141,12 +146,12 @@ class CloudSystemMaster {
     }
 
     private fun startNetworkServer() {
-        val networkServer: NetworkServerImpl by KODEIN.instance()
+        val networkServer: NetworkServer by KODEIN.instance()
         networkServer.startServer(RUNTIME_VARS.masterConfig.masterPort)
     }
 
     private fun startWebServer() {
-        val webServer: WebServerImpl by KODEIN.instance()
+        val webServer: WebServer by KODEIN.instance()
         webServer.startServer(RUNTIME_VARS.masterConfig.webServerPort)
     }
 
@@ -156,12 +161,12 @@ class CloudSystemMaster {
     }
 
     private fun shutdownNetworkServer() {
-        val networkServer: NetworkServerImpl by KODEIN.instance()
+        val networkServer: NetworkServer by KODEIN.instance()
         networkServer.shutdownGracefully()
     }
 
     private fun shutdownWebServer() {
-        val webServer: WebServerImpl by KODEIN.instance()
+        val webServer: WebServer by KODEIN.instance()
         webServer.shutdownGracefully()
     }
 

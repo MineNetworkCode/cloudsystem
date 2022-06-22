@@ -5,11 +5,11 @@ import io.netty.handler.codec.http.HttpObjectAggregator
 import io.netty.handler.codec.http.HttpRequestDecoder
 import io.netty.handler.codec.http.HttpResponseEncoder
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
-import systems.beemo.cloudsystem.library.network.web.WebServer
+import systems.beemo.cloudsystem.library.network.web.AbstractWebServer
 
-class WebServerImpl(
+class WebServer(
     nettyHelper: NettyHelper
-) : WebServer(nettyHelper) {
+) : AbstractWebServer(nettyHelper) {
 
     override fun preparePipeline(channel: Channel) {
         channel.pipeline()

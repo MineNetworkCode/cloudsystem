@@ -34,6 +34,7 @@ class NetworkHandler : SimpleChannelInboundHandler<Packet>() {
         )
     }
 
+    @Deprecated("Deprecated in Java")
     override fun exceptionCaught(channelHandlerContext: ChannelHandlerContext, cause: Throwable) {
         errorHandler.handleError(workerRegistry.getWorkerByChannel(channelHandlerContext.channel()), cause)
     }
