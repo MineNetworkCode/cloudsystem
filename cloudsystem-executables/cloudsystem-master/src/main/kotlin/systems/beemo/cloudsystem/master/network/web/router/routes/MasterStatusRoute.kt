@@ -7,7 +7,6 @@ import io.netty.handler.codec.http.*
 import io.netty.util.CharsetUtil
 import org.kodein.di.instance
 import systems.beemo.cloudsystem.library.document.Document
-import systems.beemo.cloudsystem.library.request.utils.ContentType
 import systems.beemo.cloudsystem.library.threading.ThreadPool
 import systems.beemo.cloudsystem.library.utils.HardwareUtils
 import systems.beemo.cloudsystem.library.utils.RoundUtils
@@ -32,6 +31,7 @@ class MasterStatusRoute : Route {
             .appendInt("runningExecutorServiceThreads", threadPool.internalPool.activeCount)
 
         val workerInfo = JsonArray()
+
         workerRegistry.getWorkers().forEach {
             val document = Document().appendString("workerName", "${it.name}${it.delimiter}${it.suffix}")
                 .appendLong("memory", it.memory)

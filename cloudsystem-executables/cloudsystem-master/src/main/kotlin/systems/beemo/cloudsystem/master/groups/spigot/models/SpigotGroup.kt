@@ -1,24 +1,25 @@
 package systems.beemo.cloudsystem.master.groups.spigot.models
 
 import systems.beemo.cloudsystem.library.document.Document
+import systems.beemo.cloudsystem.master.groups.AbstractGroup
 
-data class SpigotGroup(
-    val name: String,
+open class SpigotGroup(
+    name: String,
+    maxServersOnline: Int,
+    minServersOnline: Int,
+    maxMemory: Int,
+    minMemory: Int,
+    maxPlayers: Int,
+    joinPower: Int,
+    maintenance: Boolean,
     val template: String,
-    var maxServersOnline: Int,
-    var minServersOnline: Int,
-    var maxMemory: Int,
-    var minMemory: Int,
-    var maxPlayers: Int,
     var newServerPercentage: Int,
-    var joinPower: Int,
-    var maintenance: Boolean,
     var lobbyServer: Boolean,
     var dynamicServer: Boolean,
     var staticServer: Boolean,
     var randomTemplateMode: Boolean,
     var templateModes: MutableList<String>,
-) {
+) : AbstractGroup(name, maxServersOnline, minServersOnline, maxMemory, minMemory, maxPlayers, joinPower, maintenance) {
 
     companion object {
         fun toDocument(spigotGroup: SpigotGroup): Document {

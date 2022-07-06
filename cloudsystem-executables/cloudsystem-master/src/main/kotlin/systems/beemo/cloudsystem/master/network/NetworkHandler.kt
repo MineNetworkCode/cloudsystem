@@ -5,6 +5,7 @@ import io.netty.channel.SimpleChannelInboundHandler
 import org.kodein.di.instance
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import systems.beemo.cloudsystem.library.network.error.ErrorHandler
 import systems.beemo.cloudsystem.library.network.protocol.Packet
 import systems.beemo.cloudsystem.master.CloudSystemMaster
 import systems.beemo.cloudsystem.master.worker.WorkerRegistry
@@ -14,6 +15,7 @@ class NetworkHandler : SimpleChannelInboundHandler<Packet>() {
     private val logger: Logger = LoggerFactory.getLogger(NetworkHandler::class.java)
 
     private val workerRegistry: WorkerRegistry by CloudSystemMaster.KODEIN.instance()
+    private val errorHandler: ErrorHandler by CloudSystemMaster.KODEIN.instance()
 
     override fun channelRead0(channelHandlerContext: ChannelHandlerContext, packet: Packet) {
         packet.handle(channelHandlerContext)
@@ -32,7 +34,8 @@ class NetworkHandler : SimpleChannelInboundHandler<Packet>() {
         )
     }
 
-    @Throws(Exception::class)
+    @Deprecated("Deprecated in Java")
     override fun exceptionCaught(channelHandlerContext: ChannelHandlerContext, cause: Throwable) {
+        errorHandler.handleError(workerRegistry.getWorkerByChannel(channelHandlerContext.channel()), cause)
     }
 }

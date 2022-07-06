@@ -3,6 +3,7 @@ package systems.beemo.cloudsystem.library.utils
 import com.sun.management.OperatingSystemMXBean
 import java.lang.management.ManagementFactory
 import java.lang.management.RuntimeMXBean
+import java.net.ServerSocket
 
 class HardwareUtils {
 
@@ -37,6 +38,17 @@ class HardwareUtils {
 
         fun getOperatingSystemBean(): OperatingSystemMXBean {
             return ManagementFactory.getOperatingSystemMXBean() as OperatingSystemMXBean
+        }
+
+        fun isPortFree(port: Int): Boolean {
+            return try {
+                val serverSocket = ServerSocket(port)
+                serverSocket.close()
+
+                true
+            } catch (e: Exception) {
+                false
+            }
         }
     }
 }

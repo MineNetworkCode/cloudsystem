@@ -1,17 +1,18 @@
 package systems.beemo.cloudsystem.master.groups.bungee.models
 
 import systems.beemo.cloudsystem.library.document.Document
+import systems.beemo.cloudsystem.master.groups.AbstractGroup
 
-data class BungeeGroup(
-    val name: String,
-    var maxServersOnline: Int,
-    var minServersOnline: Int,
-    var maxMemory: Int,
-    var minMemory: Int,
-    var maxPlayers: Int,
-    var joinPower: Int,
-    var maintenance: Boolean,
-) {
+open class BungeeGroup(
+    name: String,
+    maxServersOnline: Int,
+    minServersOnline: Int,
+    maxMemory: Int,
+    minMemory: Int,
+    maxPlayers: Int,
+    joinPower: Int,
+    maintenance: Boolean,
+) : AbstractGroup(name, maxServersOnline, minServersOnline, maxMemory, minMemory, maxPlayers, joinPower, maintenance) {
 
     companion object {
         fun toDocument(bungeeGroup: BungeeGroup): Document {

@@ -6,7 +6,7 @@ import systems.beemo.cloudsystem.library.network.protocol.Packet
 
 class NetworkUtils {
 
-    fun sendPacketAsync(packet: Packet, channel: Channel): ChannelFuture? {
+    fun sendPacket(packet: Packet, channel: Channel): ChannelFuture? {
         return channel.writeAndFlush(packet)
     }
 }

@@ -5,12 +5,8 @@ import com.google.gson.JsonElement
 import systems.beemo.cloudsystem.library.document.Document
 
 data class MasterConfig(
-    val cloudServerPort: Int,
+    val masterPort: Int,
     val webServerPort: Int,
-    val masterName: String,
-    val spigotName: String,
-    val spigotVersion: String,
-    val bungeeName: String,
     val databaseBackend: String,
     val validWorkers: MutableList<ValidWorkerConfig>,
     val databases: DatabaseConfig
@@ -18,12 +14,8 @@ data class MasterConfig(
 
     companion object {
         fun toDocument(masterConfig: MasterConfig): Document {
-            return Document().appendInt("cloudServerPort", masterConfig.cloudServerPort)
+            return Document().appendInt("masterPort", masterConfig.masterPort)
                 .appendInt("webServerPort", masterConfig.webServerPort)
-                .appendString("masterName", masterConfig.masterName)
-                .appendString("spigotName", masterConfig.spigotName)
-                .appendString("spigotVersion", masterConfig.spigotVersion)
-                .appendString("bungeeName", masterConfig.bungeeName)
                 .appendString("databaseBackend", masterConfig.databaseBackend)
                 .appendJsonElement("validWorkers", createValidWorkerConfig(masterConfig))
                 .appendDocument("databases", createDatabaseConfig(masterConfig))
@@ -44,7 +36,6 @@ data class MasterConfig(
 
         private fun createDatabaseConfig(masterConfig: MasterConfig): Document {
             val mongoDbConfig = masterConfig.databases.mongoDbConfig
-            val faunaConfig = masterConfig.databases.faunaDbConfig
 
             val mongoConfig = Document().appendString("databaseHost", mongoDbConfig.databaseHost)
                 .appendString("databaseName", mongoDbConfig.databaseName)
@@ -54,21 +45,13 @@ data class MasterConfig(
                 .appendString("password", mongoDbConfig.password)
                 .appendBoolean("useAuth", mongoDbConfig.useAuth)
 
-            val faunaDbConfig = Document().appendString("databaseHost", faunaConfig.databaseHost)
-                .appendString("databaseName", faunaConfig.databaseName)
-                .appendString("secretKey", faunaConfig.secretKey)
-
-            return Document().appendDocument("mongodb", mongoConfig).appendDocument("faunadb", faunaDbConfig)
+            return Document().appendDocument("mongodb", mongoConfig)
         }
 
         fun fromDocument(document: Document): MasterConfig {
             return MasterConfig(
-                cloudServerPort = document.getIntValue("cloudServerPort"),
+                masterPort = document.getIntValue("masterPort"),
                 webServerPort = document.getIntValue("webServerPort"),
-                masterName = document.getStringValue("masterName"),
-                spigotName = document.getStringValue("spigotName"),
-                spigotVersion = document.getStringValue("spigotVersion"),
-                bungeeName = document.getStringValue("bungeeName"),
                 databaseBackend = document.getStringValue("databaseBackend"),
                 validWorkers = processValidWorkers(document.getJsonElementValue("validWorkers").asJsonArray),
                 databases = processDatabases(document.getDocument("databases"))
@@ -87,8 +70,7 @@ data class MasterConfig(
 
         private fun processDatabases(document: Document): DatabaseConfig {
             return DatabaseConfig(
-                mongoDbConfig = processMongoDbDatabase(Document(document.getJsonElementValue("mongodb").asJsonObject)),
-                faunaDbConfig = processFaunaDbDatabase(Document(document.getJsonElementValue("faunadb").asJsonObject))
+                mongoDbConfig = processMongoDbDatabase(Document(document.getJsonElementValue("mongodb").asJsonObject))
             )
         }
 
@@ -101,14 +83,6 @@ data class MasterConfig(
                 username = document.getStringValue("username"),
                 password = document.getStringValue("password"),
                 useAuth = document.getBooleanValue("useAuth")
-            )
-        }
-
-        private fun processFaunaDbDatabase(document: Document): FaunaDbConfig {
-            return FaunaDbConfig(
-                databaseHost = document.getStringValue("databaseHost"),
-                databaseName = document.getStringValue("databaseName"),
-                secretKey = document.getStringValue("secretKey")
             )
         }
     }

@@ -8,27 +8,26 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import systems.beemo.cloudsystem.library.command.CommandManager
 import systems.beemo.cloudsystem.library.configuration.ConfigurationLoader
+import systems.beemo.cloudsystem.library.network.error.ErrorHandler
 import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
+import systems.beemo.cloudsystem.library.utils.StringUtils
 import systems.beemo.cloudsystem.master.commands.HelpCommand
 import systems.beemo.cloudsystem.master.configuration.*
-import systems.beemo.cloudsystem.master.configuration.models.MasterConfig
 import systems.beemo.cloudsystem.master.groups.bungee.BungeeGroupHandler
 import systems.beemo.cloudsystem.master.groups.spigot.SpigotGroupHandler
-import systems.beemo.cloudsystem.master.network.NetworkServerImpl
-import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerRequestConnection
-import systems.beemo.cloudsystem.master.network.protocol.incoming.PacketInWorkerUpdateLoadStatus
-import systems.beemo.cloudsystem.master.network.protocol.outgoing.process.PacketOutRequestProcess
-import systems.beemo.cloudsystem.master.network.protocol.outgoing.worker.PacketOutWorkerConnectionEstablished
+import systems.beemo.cloudsystem.master.network.NetworkServer
 import systems.beemo.cloudsystem.master.network.utils.NetworkUtils
-import systems.beemo.cloudsystem.master.network.web.CloudWebServerImpl
+import systems.beemo.cloudsystem.master.network.web.WebServer
 import systems.beemo.cloudsystem.master.network.web.router.Router
 import systems.beemo.cloudsystem.master.network.web.router.routes.MasterStatusRoute
-import systems.beemo.cloudsystem.master.process.ProcessRegistry
-import systems.beemo.cloudsystem.master.process.ProcessRequestHandler
+import systems.beemo.cloudsystem.master.runtime.RuntimeVars
 import systems.beemo.cloudsystem.master.worker.WorkerRegistry
+import systems.beemo.cloudsystem.master.worker.protocol.`in`.PacketInWorkerRequestConnection
+import systems.beemo.cloudsystem.master.worker.protocol.`in`.PacketInWorkerUpdateLoadStatus
+import systems.beemo.cloudsystem.master.worker.protocol.out.PacketOutWorkerConnectionEstablished
 import kotlin.system.exitProcess
 
 class CloudSystemMaster {
@@ -37,14 +36,16 @@ class CloudSystemMaster {
 
     companion object {
         lateinit var KODEIN: DI
-        lateinit var MASTER_CONFIG: MasterConfig
-        lateinit var SECRET_KEY: String
-        lateinit var WEB_KEY: String
+
+        val RUNTIME_VARS: RuntimeVars = RuntimeVars()
     }
 
     fun start(args: Array<String>) {
+        StringUtils.printHeader("Master")
+
         this.prepareDI()
         this.checkForRoot(args)
+        this.checkForDebug(args)
 
         this.executeConfigurations()
         this.startCommandRunner()
@@ -80,8 +81,7 @@ class CloudSystemMaster {
                 configurationLoader.registerConfiguration(DefaultCloudConfiguration())
                 configurationLoader.registerConfiguration(SpigotDownloadConfiguration())
                 configurationLoader.registerConfiguration(BungeeDownloadConfiguration())
-                configurationLoader.registerConfiguration(WorkerKeyCreator())
-                configurationLoader.registerConfiguration(WebKeyCreator())
+                configurationLoader.registerConfiguration(KeysCreator())
                 configurationLoader.registerConfiguration(SpigotGroupLoader(instance()))
                 configurationLoader.registerConfiguration(BungeeGroupLoader(instance()))
 
@@ -102,14 +102,13 @@ class CloudSystemMaster {
 
                 packetRegistry.registerIncomingPacket(PacketId.PACKET_REQUEST_CONNECTION, PacketInWorkerRequestConnection::class.java)
                 packetRegistry.registerIncomingPacket(PacketId.PACKET_UPDATE_LOAD_STATUS, PacketInWorkerUpdateLoadStatus::class.java)
+
                 packetRegistry.registerOutgoingPacket(PacketId.PACKET_ESTABLISHED_CONNECTION, PacketOutWorkerConnectionEstablished::class.java)
-                packetRegistry.registerOutgoingPacket(PacketId.PACKET_REQUEST_PROCESS, PacketOutRequestProcess::class.java)
 
                 packetRegistry
             }
 
-            bind<ProcessRegistry>() with singleton { ProcessRegistry() }
-            bind<ProcessRequestHandler>() with singleton { ProcessRequestHandler(instance(), instance(), instance(), instance(), instance()) }
+            bind<ErrorHandler>() with singleton { ErrorHandler() }
 
             bind<Router>() with singleton {
                 val router = Router()
@@ -119,8 +118,8 @@ class CloudSystemMaster {
                 router
             }
 
-            bind<NetworkServerImpl>() with singleton { NetworkServerImpl(instance(), instance()) }
-            bind<CloudWebServerImpl>() with singleton { CloudWebServerImpl(instance()) }
+            bind<NetworkServer>() with singleton { NetworkServer(instance(), instance()) }
+            bind<WebServer>() with singleton { WebServer(instance()) }
         }
     }
 
@@ -130,6 +129,10 @@ class CloudSystemMaster {
             logger.error("If you want to use it anyway, at your own risk, add \"--enable-root\" to the start arguments.")
             exitProcess(0)
         }
+    }
+
+    private fun checkForDebug(args: Array<String>) {
+        RUNTIME_VARS.debug = args.contains("--debug")
     }
 
     private fun executeConfigurations() {
@@ -143,13 +146,13 @@ class CloudSystemMaster {
     }
 
     private fun startNetworkServer() {
-        val networkServer: NetworkServerImpl by KODEIN.instance()
-        networkServer.startServer(MASTER_CONFIG.cloudServerPort)
+        val networkServer: NetworkServer by KODEIN.instance()
+        networkServer.startServer(RUNTIME_VARS.masterConfig.masterPort)
     }
 
     private fun startWebServer() {
-        val cloudWebServer: CloudWebServerImpl by KODEIN.instance()
-        cloudWebServer.startServer(MASTER_CONFIG.webServerPort)
+        val webServer: WebServer by KODEIN.instance()
+        webServer.startServer(RUNTIME_VARS.masterConfig.webServerPort)
     }
 
     private fun shutdownCommandRunner() {
@@ -157,14 +160,14 @@ class CloudSystemMaster {
         commandManager.stop()
     }
 
-    private fun shutdownWebServer() {
-        val cloudWebServer: CloudWebServerImpl by KODEIN.instance()
-        cloudWebServer.shutdownGracefully()
+    private fun shutdownNetworkServer() {
+        val networkServer: NetworkServer by KODEIN.instance()
+        networkServer.shutdownGracefully()
     }
 
-    private fun shutdownNetworkServer() {
-        val networkServer: NetworkServerImpl by KODEIN.instance()
-        networkServer.shutdownGracefully()
+    private fun shutdownWebServer() {
+        val webServer: WebServer by KODEIN.instance()
+        webServer.shutdownGracefully()
     }
 
     private fun shutdownThreads() {

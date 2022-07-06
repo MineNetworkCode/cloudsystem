@@ -1,6 +1,5 @@
 package systems.beemo.cloudsystem.worker
 
-import io.netty.channel.Channel
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.instance
@@ -13,16 +12,17 @@ import systems.beemo.cloudsystem.library.network.helper.NettyHelper
 import systems.beemo.cloudsystem.library.network.protocol.PacketId
 import systems.beemo.cloudsystem.library.network.protocol.PacketRegistry
 import systems.beemo.cloudsystem.library.threading.ThreadPool
+import systems.beemo.cloudsystem.library.utils.StringUtils
 import systems.beemo.cloudsystem.worker.commands.HelpCommand
 import systems.beemo.cloudsystem.worker.configuration.DefaultCloudConfiguration
 import systems.beemo.cloudsystem.worker.configuration.DefaultFolderCreator
 import systems.beemo.cloudsystem.worker.configuration.WorkerKeyReader
-import systems.beemo.cloudsystem.worker.configuration.models.WorkerConfig
-import systems.beemo.cloudsystem.worker.network.NetworkClientImpl
-import systems.beemo.cloudsystem.worker.network.protocol.incoming.PacketInWorkerConnectionEstablished
-import systems.beemo.cloudsystem.worker.network.protocol.outgoing.PacketOutWorkerRequestConnection
-import systems.beemo.cloudsystem.worker.network.protocol.outgoing.PacketOutWorkerUpdateLoadStatus
+import systems.beemo.cloudsystem.worker.network.NetworkClient
+import systems.beemo.cloudsystem.worker.network.protocol.`in`.PacketInWorkerConnectionEstablished
+import systems.beemo.cloudsystem.worker.network.protocol.out.PacketOutWorkerRequestConnection
+import systems.beemo.cloudsystem.worker.network.protocol.out.PacketOutWorkerUpdateLoadStatus
 import systems.beemo.cloudsystem.worker.network.utils.NetworkUtils
+import systems.beemo.cloudsystem.worker.runtime.RuntimeVars
 import systems.beemo.cloudsystem.worker.tasks.UpdateLoadInfoTask
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -33,18 +33,17 @@ class CloudSystemWorker {
     private val logger: Logger = LoggerFactory.getLogger(CloudSystemWorker::class.java)
 
     companion object {
-        lateinit var MASTER_CHANNEL: Channel
         lateinit var KODEIN: DI
 
-        lateinit var WORKER_CONFIG: WorkerConfig
-
-        lateinit var SECRET_KEY: String
-        lateinit var WEB_KEY: String
+        val RUNTIME_VARS = RuntimeVars()
     }
 
     fun start(args: Array<String>) {
+        StringUtils.printHeader("Worker")
+
         this.prepareDI()
         this.checkForRoot(args)
+        this.checkForDebug(args)
 
         this.executeConfigurations()
         this.startCommandRunner()
@@ -98,7 +97,7 @@ class CloudSystemWorker {
                 packetRegistry
             }
 
-            bind<NetworkClientImpl>() with singleton { NetworkClientImpl(instance(), instance()) }
+            bind<NetworkClient>() with singleton { NetworkClient(instance(), instance()) }
         }
     }
 
@@ -108,6 +107,10 @@ class CloudSystemWorker {
             logger.error("If you want to use it anyway, at your own risk, add \"--enable-root\" to the start arguments.")
             exitProcess(0)
         }
+    }
+
+    private fun checkForDebug(args: Array<String>) {
+        RUNTIME_VARS.debug = args.contains("--debug")
     }
 
     private fun executeConfigurations() {
@@ -121,8 +124,8 @@ class CloudSystemWorker {
     }
 
     private fun startNetworkClient() {
-        val networkClient: NetworkClientImpl by KODEIN.instance()
-        networkClient.startClient(WORKER_CONFIG.cloudServerAddress, WORKER_CONFIG.cloudServerPort)
+        val networkClient: NetworkClient by KODEIN.instance()
+        networkClient.startClient(RUNTIME_VARS.workerConfig.masterAddress, RUNTIME_VARS.workerConfig.masterPort)
     }
 
     private fun startTasks() {
@@ -136,7 +139,7 @@ class CloudSystemWorker {
     }
 
     private fun shutdownNetworkClient() {
-        val networkClient: NetworkClientImpl by KODEIN.instance()
+        val networkClient: NetworkClient by KODEIN.instance()
         networkClient.shutdownGracefully()
     }
 

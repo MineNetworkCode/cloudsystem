@@ -11,7 +11,7 @@ import java.io.File
 
 class SpigotGroupLoader(
     private val spigotGroupHandler: SpigotGroupHandler
-) : Configuration {
+) : Configuration() {
 
     private val logger: Logger = LoggerFactory.getLogger(SpigotGroupLoader::class.java)
 

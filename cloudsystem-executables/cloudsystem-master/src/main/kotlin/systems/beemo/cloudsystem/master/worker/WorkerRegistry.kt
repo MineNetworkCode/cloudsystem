@@ -7,7 +7,7 @@ import java.util.stream.Collectors
 
 class WorkerRegistry {
 
-    private val workers: Cache<String, WorkerInfo> = Cache()
+    val workers: Cache<String, WorkerInfo> = Cache()
 
     fun registerWorker(workerInfo: WorkerInfo): Boolean {
         if (this.workers.containsKey(workerInfo.uuid)) return false
