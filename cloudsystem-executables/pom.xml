@@ -17,7 +17,7 @@
 
     <properties>
         <jar.plugin.version>3.2.2</jar.plugin.version>
-        <assembly.plugin.version>3.4.0</assembly.plugin.version>
+        <assembly.plugin.version>3.4.2</assembly.plugin.version>
     </properties>
 
     <dependencies>
